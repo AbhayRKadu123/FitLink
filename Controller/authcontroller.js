@@ -14,7 +14,7 @@ const Login=async (req, res) => {
 
     const token = jwt.sign({ id: user._id },'TOKEN', { expiresIn: "1h" });
 
-    res.json({ message: "Login successful", token,username:user?.username });
+    res.status(200).json({ message: "Login successful", token,username:user?.username });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }}
@@ -25,6 +25,7 @@ const SignUp=async(req,res)=>{
     console.log('signup',req.body)
 
     const existingUser = await UserModel.findOne({username });
+    console.log('existingUser',existingUser)
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);

@@ -10,11 +10,16 @@ import WorkoutApi from './Router/WorkoutApi.js';
 
 
 // enable CORS for all routes
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: "*",          // accept all origins
+  methods: ["GET", "POST", "PUT", "DELETE"],  // allowed methods
+  allowedHeaders: ["Content-Type", "Authorization"] // headers you allow
+}));
 
 // const MONGO_URI = 'mongodb://127.0.0.1:27017/FitLinkDB'; 
 // mongodburl=mongodb+srv://abhay:SHnj@575575@cluster0.a97kb.mongodb.net/?appName=Cluster0
-const MONGO_URI='mongodb+srv://abhaykadu203_db_user:afRFCezNGhSfqrOP@cluster0.g7hamw5.mongodb.net/?appName=Cluster0'
+const MONGO_URI='mongodb+srv://abhaykadu203_db_user:afRFCezNGhSfqrOP@cluster0.g7hamw5.mongodb.net/?appName=Cluster0';
 // or use your Atlas connection string
 
 mongoose.connect(MONGO_URI, {
