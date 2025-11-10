@@ -14,7 +14,7 @@ import WorkoutApi from './Router/WorkoutApi.js';
 app.use(cors({
   origin: "*",          // accept all origins
   methods: ["GET", "POST", "PUT", "DELETE"],  // allowed methods
-  allowedHeaders: ["Content-Type", "Authorization"] // headers you allow
+  // allowedHeaders: ["Content-Type", "Authorization"] // headers you allow
 }));
 
 // const MONGO_URI = 'mongodb://127.0.0.1:27017/FitLinkDB'; 
