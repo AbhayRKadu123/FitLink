@@ -186,13 +186,14 @@ try{
   const id = new mongoose.Types.ObjectId(req?.query?.id);
 
   let Result=await Session.aggregate([{$match:{_id:id}}])
-  console.log('WorkoutHistoryDetail=',Result)
-    console.log('result=before', results)
+  // console.log('WorkoutHistoryDetail=',Result)
+    // console.log('result=before', results)
 
   res.status(200).json({Result:Result})
 
 
 }catch(err){
+  console.log('err',err)
     res.status(400).json({ message: "something went wrong" })
 
   // consq
