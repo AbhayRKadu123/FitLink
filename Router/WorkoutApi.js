@@ -15,11 +15,11 @@ WorkoutApi.delete("/DeleteRoutin",verifyToken,Deleteworkoutroutin)
 // /workout/UpdateRoutin/:id
 WorkoutApi.put("/UpdateRoutin/:id",verifyToken,Updateworkoutroutin)
 WorkoutApi.put("/updateUserActiveWorkoutPlan",verifyToken,updateUserActiveWorkoutPlan)
-WorkoutApi.post("/addworkoutsession",AddWorkoutSession);
-WorkoutApi.get("/getworkoutsession",Getworkoutsession)
-WorkoutApi.get("/GetDailySession",GetDailySession)
-WorkoutApi.put("/UpdateWorkoutSession",UpdateWorkoutSession)
-WorkoutApi.get("/GetWorkoutHistory",GetWorkoutHistory)
-WorkoutApi.get("/WorkoutHistoryDetail",WorkoutHistoryDetail)
+WorkoutApi.post("/addworkoutsession",verifyToken,AddWorkoutSession);
+WorkoutApi.get("/getworkoutsession",verifyToken,Getworkoutsession)
+WorkoutApi.get("/GetDailySession",verifyToken,GetDailySession)
+WorkoutApi.put("/UpdateWorkoutSession",verifyToken,UpdateWorkoutSession)
+WorkoutApi.get("/GetWorkoutHistory",verifyToken,GetWorkoutHistory)
+WorkoutApi.get("/WorkoutHistoryDetail",verifyToken,WorkoutHistoryDetail)
 
 export default WorkoutApi;

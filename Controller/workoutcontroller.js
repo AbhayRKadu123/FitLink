@@ -67,7 +67,7 @@ const Updateworkoutroutin = async (req, res) => {
 const updateUserActiveWorkoutPlan = async (req, res) => {
   try {
 
-    // console.log('updateUserActiveWorkoutPlan', req?.body?.Id)
+    console.log('updateUserActiveWorkoutPlan', req?.body)
     let Id = req?.body?.Id;
     let User = await UserModel.findByIdAndUpdate({ _id: req?.user?.id }, { $set: { ActiveWorkoutPlan: Id, planName: "CustomPlan" } })
     // console.log('Routin', User)
@@ -86,6 +86,11 @@ const AddWorkoutSession = async (req, res) => {
   try {
     // let result=await SessionSchema(req?.body)
     // res.send(result)
+    let Id = req?.body?.Id;
+    if(Id){
+      let resullt=await Session.findById(Id)
+      if(resullt) return res.status(409).json({message:'Session Already Exist'})
+    }
     let session = new Session(req?.body);
     let result = await session.save()
     res.status(200).json({ result: result })
