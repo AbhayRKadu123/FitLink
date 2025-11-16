@@ -172,7 +172,10 @@ const Getworkoutsession = async (req, res) => {
 
 const GetWorkoutHistory = async (req, res) => {
   try {
-    let Result = await Session.aggregate([{ $match: { planType: 'custom' } }, { $sort: { createdAt: -1 } }, { $project: { _id: 1, planType: 1, username: 1, date: 1, Title: 1,day:1 } }])
+        let User = await UserModel.findById(req?.user?.id)
+
+    let Result = await Session.aggregate([{ $match: { planType: 'custom',username:
+User?.username} }, { $sort: { createdAt: -1 } }, { $project: { _id: 1, planType: 1, username: 1, date: 1, Title: 1,day:1 } }])
     console.log('Result=', Result)
     res.send(Result)
 
@@ -316,7 +319,8 @@ const GetUserProgress=async (req,res)=>{
   try{
     console.log('req.query',req.query.Date)
     let Date=req.query.Date
-    let Progress=await Session.findOne({date:Date})
+    let User = await UserModel.findById(req?.user?.id)
+    let Progress=await Session.findOne({date:Date,username:User?.username})
     // console.log('Progress',Progress?.exercises)s
     if(Progress){
       let NoOfExercise=Progress?.exercises?.length;
@@ -365,7 +369,7 @@ if(result?.mon){
     ],
     day:ReqDay
   }
-  
+
 
 
 }
