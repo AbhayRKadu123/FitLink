@@ -7,6 +7,7 @@ export function verifyToken(req, res, next) {
 
   try {
     const verified = jwt.verify(token, 'TOKEN');
+    console.log("verified",verified)
     req.user = verified;
     
     next();

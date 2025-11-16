@@ -1,5 +1,5 @@
 import express from "express"
-import {WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
+import {DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
 
 
  } from "../Controller/workoutcontroller.js";
@@ -21,5 +21,8 @@ WorkoutApi.get("/GetDailySession",verifyToken,GetDailySession)
 WorkoutApi.put("/UpdateWorkoutSession",verifyToken,UpdateWorkoutSession)
 WorkoutApi.get("/GetWorkoutHistory",verifyToken,GetWorkoutHistory)
 WorkoutApi.get("/WorkoutHistoryDetail",verifyToken,WorkoutHistoryDetail)
+WorkoutApi.get("/GetWorkoutBarChartDetail",verifyToken,GetWorkoutBarChartDetail)
+WorkoutApi.get("/GetUserProgress",verifyToken,GetUserProgress)
+WorkoutApi.post("/DailyWorkoutSessionUpdate",verifyToken,DailyWorkoutSessionUpdate)
 
 export default WorkoutApi;

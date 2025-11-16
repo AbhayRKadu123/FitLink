@@ -87,9 +87,9 @@ const AddWorkoutSession = async (req, res) => {
     // let result=await SessionSchema(req?.body)
     // res.send(result)
     let Id = req?.body?.Id;
-    if(Id){
-      let resullt=await Session.findById(Id)
-      if(resullt) return res.status(409).json({message:'Session Already Exist'})
+    if (Id) {
+      let resullt = await Session.findById(Id)
+      if (resullt) return res.status(409).json({ message: 'Session Already Exist' })
     }
     let session = new Session(req?.body);
     let result = await session.save()
@@ -98,36 +98,38 @@ const AddWorkoutSession = async (req, res) => {
 
   } catch (err) {
     console.log('err', err)
-    res.status(500).json({ message: "Error adding workout", err});
+    res.status(500).json({ message: "Error adding workout", err });
 
 
   }
 }
 const UpdateWorkoutSession = async (req, res) => {
-  try{
+  try {
 
-console.log('req.body', req.body)
-let {username,
-  planType,
-  Title,
-  day,
-  date,
-  exercises}=req?.body;
-let result=await Session.findByIdAndUpdate({_id:req.body._id},{username,
-  planType,
-  Title,
-  day,
-  date,
-  exercises})
-  console.log("result",result)
-  res.status(200).json({ result: result })
-  }catch(err){
+    console.log('req.body', req.body)
+    let { username,
+      planType,
+      Title,
+      day,
+      date,
+      exercises } = req?.body;
+    let result = await Session.findByIdAndUpdate({ _id: req.body._id }, {
+      username,
+      planType,
+      Title,
+      day,
+      date,
+      exercises
+    })
+    console.log("result", result)
+    res.status(200).json({ result: result })
+  } catch (err) {
     res.status(500).json({ message: "Error updating workout", err });
 
 
   }
 
-  
+
 }
 
 const GetDailySession = async (req, res) => {
@@ -168,44 +170,294 @@ const Getworkoutsession = async (req, res) => {
   }
 }
 
-const GetWorkoutHistory=async (req,res)=>{
-  try{
-   let Result = await Session.aggregate([{$match:{planType:'custom'}},{$sort:{createdAt:-1}},{$project:{_id:1,planType:1,username:1,date:1,Title:1}}])
-   console.log('Result=',Result)
-   res.send(Result)
+const GetWorkoutHistory = async (req, res) => {
+  try {
+    let Result = await Session.aggregate([{ $match: { planType: 'custom' } }, { $sort: { createdAt: -1 } }, { $project: { _id: 1, planType: 1, username: 1, date: 1, Title: 1,day:1 } }])
+    console.log('Result=', Result)
+    res.send(Result)
 
 
 
 
-  }catch(err){
+  } catch (err) {
     res.status(400).json({ message: "something went wrong" })
 
 
   }
 }
 
-const WorkoutHistoryDetail=async (req,res)=>{
-try{
-  console.log('WorkoutHistoryDetail=')
-  
-  const id = new mongoose.Types.ObjectId(req?.query?.id);
+const WorkoutHistoryDetail = async (req, res) => {
+  try {
+    console.log('WorkoutHistoryDetail=')
 
-  let Result=await Session.aggregate([{$match:{_id:id}}])
-  // console.log('WorkoutHistoryDetail=',Result)
+    const id = new mongoose.Types.ObjectId(req?.query?.id);
+
+    let Result = await Session.aggregate([{ $match: { _id: id } }])
+    // console.log('WorkoutHistoryDetail=',Result)
     // console.log('result=before', results)
 
-  res.status(200).json({Result:Result})
+    res.status(200).json({ Result: Result })
 
 
-}catch(err){
-  console.log('err',err)
+  } catch (err) {
+    console.log('err', err)
     res.status(400).json({ message: "something went wrong" })
 
-  // consq
+    // consq
+
+  }
 
 }
 
+
+const GetWorkoutBarChartDetail = async (req, res) => {
+  try {
+    let FinalResult = [];
+
+    // --------------------------- UTIL FUNCTIONS ---------------------------- //
+
+    // Safely gets prevSet for one exercise
+    function GetSpecificExerciseDetail(arr, Title) {
+      if (!Array.isArray(arr)) return [];
+
+      for (let j = 0; j < arr.length; j++) {
+        if (arr[j]?.name === Title) {
+          return arr[j]?.sets || [];
+        }
+      }
+
+      return [];
+    }
+
+    // Creates graph-friendly data for frontend charts
+    function GetFormatedData(data) {
+      const prev = Array.isArray(data?.prevSet) ? data.prevSet : [];
+      const curr = Array.isArray(data?.TodaysSet) ? data.TodaysSet : [];
+
+      const longest = prev.length > curr.length ? prev : curr;
+      let formatted = [];
+
+      for (let i = 0; i < longest.length; i++) {
+        formatted.push({
+          set: i + 1,
+          lastReps: prev[i]?.reps || 0,
+          lastWeight: prev[i]?.weight || 0,
+          currentReps: curr[i]?.reps || 0,
+          currentWeight: curr[i]?.weight || 0
+        });
+      }
+
+      return {
+        name: data?.name || "Unknown",
+        Data: formatted
+      };
+    }
+
+    // --------------------------- MAIN LOGIC ---------------------------- //
+
+    const Id = new mongoose.Types.ObjectId(req?.query?.id);
+    const sessionData = await Session.findById(Id);
+
+    if (!sessionData) {
+      return res.status(404).json({ error: true, message: "Session not found" });
+    }
+
+    const title = sessionData?.Title;
+    const givenDate = sessionData?.createdAt;
+
+    const GraphData = await Session.aggregate([
+      { $match: { Title: title, createdAt: { $lte: givenDate } } },
+      { $sort: { createdAt: -1 } },
+      { $project: { exercises: 1 } }
+    ]);
+
+    if (!Array.isArray(GraphData) || GraphData.length === 0) {
+      return res.status(200).json({ result: [] });
+    }
+
+    const today = GraphData[0]?.exercises || [];
+    const hasPrev = GraphData.length > 1;
+    const previous = hasPrev ? GraphData[1]?.exercises || [] : [];
+
+    let graphResult = [];
+
+    for (let i = 0; i < today.length; i++) {
+      const exerciseName = today[i]?.name;
+
+      const prevSetData = hasPrev
+        ? GetSpecificExerciseDetail(previous, exerciseName)
+        : [];
+
+      const todaySetData = Array.isArray(today[i]?.sets)
+        ? today[i].sets
+        : [];
+
+      graphResult.push({
+        name: exerciseName || "Unknown",
+        prevSet: prevSetData,
+        TodaysSet: todaySetData
+      });
+    }
+
+    // Format all results
+    for (let i = 0; i < graphResult.length; i++) {
+      FinalResult.push(GetFormatedData(graphResult[i]));
+    }
+
+    return res.status(200).json({ result: FinalResult });
+
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: true, message: err.message || "Something went wrong" });
+  }
+};
+const GetUserProgress=async (req,res)=>{
+
+  try{
+    console.log('req.query',req.query.Date)
+    let Date=req.query.Date
+    let Progress=await Session.findOne({date:Date})
+    // console.log('Progress',Progress?.exercises)s
+    if(Progress){
+      let NoOfExercise=Progress?.exercises?.length;
+      let Progresscount=0;
+      for(let i=0;i<NoOfExercise;i++){
+        if(Progress?.exercises[i].sets.length!==0){
+          Progresscount=Progresscount+100/NoOfExercise;
+        }
+
+      }
+      console.log('Progress',Progresscount)
+      res.status(200).json({ProgressPercentage:Progresscount})
+
+
+
+    }else{
+      res.status(200).json({ProgressPercentage:0})
+    }
+
+  }catch(err){
+    console.log(err)
+    return res.status(400).json({ error: true, message: err.message || "Something went wrong" });
+
+
+  }
+
+}
+const DailyWorkoutSessionUpdate=async (req,res)=>{
+  try{
+let {Date,ReqDay}=req?.body;
+console.log('Date',Date)
+console.log('ReqDay',ReqDay)
+    let User = await UserModel.findById(req?.user?.id)
+    console.log('User?.username',req?.user)
+
+    let result = await WorkoutRoutine.findOne({ username: User?.username })
+
+console.log('Routin',result?.mon)
+if(result?.mon){
+  let Obj={
+    username:User?.username,
+    planType:"custom",
+    Title:result?.Title,
+    exercise:[
+     
+    ],
+    day:ReqDay
+  }
+  
+
+
 }
 
 
-export {WorkoutHistoryDetail,GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+  }catch(err){
+
+  }
+}
+// const GetWorkoutBarChartDetail = async (req, res) => {
+//   try {
+
+//     //        const pullupSets = [
+//     //   { set: 1, lastReps: 8, lastWeight: 10, currentReps: 10, currentWeight: 0 },
+//     //   { set: 2, lastReps: 6, lastWeight: 9, currentReps: 8, currentWeight: 40 },
+//     //   { set: 3, lastReps: 5, lastWeight: 5, currentReps: 6, currentWeight: 10 },
+//     //   { set: 4, lastReps: 5, lastWeight: 5, currentReps: 6, currentWeight: 10 },
+//     //   { set: 5, lastReps: 5, lastWeight: 5, currentReps: 6, currentWeight: 10 },
+
+//     // ];
+//     let FinalResult = []
+
+// function GetFormatedData(data) {
+//   let prev = Array.isArray(data?.prevSet) ? data.prevSet : [];
+//   let curr = Array.isArray(data?.TodaysSet) ? data.TodaysSet : [];
+
+//   let Arr = prev.length > curr.length ? prev : curr;
+
+//   let Data = [];
+
+//   for (let i = 0; i < Arr.length; i++) {
+//     Data.push({
+//       set: i + 1,
+//       lastReps: prev[i]?.reps || 0,
+//       lastWeight: prev[i]?.weight || 0,
+//       currentReps: curr[i]?.reps || 0,
+//       currentWeight: curr[i]?.weight || 0
+//     });
+//   }
+
+//   return {
+//     name: data?.name || "Unknown",
+//     Data
+//   };
+// }
+
+
+//     function GetSpecificExerciseDetail(arr, Title) {
+//   if (!arr || !Array.isArray(arr)) return [];
+
+//   for (let j = 0; j < arr.length; j++) {
+//     if (arr[j]?.name === Title) {
+//       return arr[j]?.sets || [];
+//     }
+//   }
+
+//   return [];
+// }
+
+//     const Id = new mongoose.Types.ObjectId(req?.query?.id);
+//     let Result = await Session.findById(Id)
+//     let title = Result?.Title
+//     let givenDate = Result?.createdAt;
+//     // console.log('day', Result)
+//     let GraphData = await Session.aggregate([{ $match: { Title: title, createdAt: { $lte: givenDate } } }, { $sort: { createdAt: -1 } }, { $project: { exercises: 1 } }])
+//     // console.log('ResultGraphData0', GraphData[0].exercises)
+//     // console.log('ResultGraphData1', GraphData[1].exercises)
+//     let graphResult = []
+
+//     for (let i = 0; i < GraphData[0].exercises.length; i++) {
+//       let PreviousSetData = GetSpecificExerciseDetail(GraphData[1]?.exercises, GraphData[0]?.exercises[i]?.name) || []
+//       let CurrentData = GraphData[0]?.exercises[i].sets || []
+//       let Obj = { name: GraphData[0]?.exercises[i]?.name, prevSet: PreviousSetData, TodaysSet: CurrentData }
+//       graphResult.push(Obj)
+//     }
+//     for (let i = 0; i < graphResult.length; i++) {
+//       let result = GetFormatedData(graphResult[i])
+//       FinalResult?.push(result)
+
+
+//     }
+//     // console.log('graphResult=', graphResult)
+
+//     res.status(200).json({ result: FinalResult })
+
+
+
+//   } catch (err) {
+//     console.log(err)
+//     res.status(400).json({ message: "something went wrong" })
+//   }
+// }
+
+
+export {DailyWorkoutSessionUpdate, GetUserProgress,GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
