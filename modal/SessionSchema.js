@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const SetSchema = new mongoose.Schema({
   reps: { type: Number },
@@ -14,6 +15,7 @@ const ExerciseSchema = new mongoose.Schema({
 const SessionSchema = new mongoose.Schema({
     username:{type:String,required:true},
   planType: { type: String, enum: ["strength", "hypertrophy", "endurance", "power", "custom"], default: "custom" },
+  isCompleted:{type:Boolean,default:false},
 
   Title: { type: String, default: "" },
   exercises: { type: [ExerciseSchema], default: [] },

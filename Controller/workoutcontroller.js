@@ -19,13 +19,23 @@ let UserDetails = async (req, res) => {
 
 }
 const addcustomworkout = async (req, res) => {
-  console.log("req.body=", req.body.data)
-  console.log("req.body=", req.body.data)
-  let Data = new WorkoutRoutine(req.body.data)
+  try{
+//  console.log("req.body=", req.body.data)
+//   console.log("req.body=", req.body.data)
+let User = await UserModel.findById(req?.user?.id)
+let RecievedData=req?.body?.data;
+RecievedData.username=User?.username;
+  let Data = new WorkoutRoutine(RecievedData)
+  console.log('Data',Data)
   let result = await Data.save();
-  // console.log('result=',result?.Id)
+  console.log('result=',result)
 
-  res.json({ val: result })
+  res.status(200).json({message:"New Routin Created SuccessFully", val: result })
+  }catch(err){
+    res.status(500).json({ message: "Error adding routin", err });
+
+  }
+ 
 }
 const Deleteworkoutroutin = async (req, res) => {
 
@@ -172,10 +182,14 @@ const Getworkoutsession = async (req, res) => {
 
 const GetWorkoutHistory = async (req, res) => {
   try {
-        let User = await UserModel.findById(req?.user?.id)
+    let User = await UserModel.findById(req?.user?.id)
 
-    let Result = await Session.aggregate([{ $match: { planType: 'custom',username:
-User?.username} }, { $sort: { createdAt: -1 } }, { $project: { _id: 1, planType: 1, username: 1, date: 1, Title: 1,day:1 } }])
+    let Result = await Session.aggregate([{
+      $match: {
+        planType: 'custom', username:
+          User?.username
+      }
+    }, { $sort: { createdAt: -1 } }, { $project: { _id: 1, planType: 1, username: 1, date: 1, Title: 1, day: 1 } }])
     console.log('Result=', Result)
     res.send(Result)
 
@@ -314,33 +328,42 @@ const GetWorkoutBarChartDetail = async (req, res) => {
     return res.status(400).json({ error: true, message: err.message || "Something went wrong" });
   }
 };
-const GetUserProgress=async (req,res)=>{
+const GetUserProgress = async (req, res) => {
 
-  try{
-    console.log('req.query',req.query.Date)
-    let Date=req.query.Date
+  try {
+    console.log('req.query', req.query.Date)
+    let Date = req.query.Date
     let User = await UserModel.findById(req?.user?.id)
-    let Progress=await Session.findOne({date:Date,username:User?.username})
+    let Progress = await Session.findOne({ date: Date, username: User?.username })
     // console.log('Progress',Progress?.exercises)s
-    if(Progress){
-      let NoOfExercise=Progress?.exercises?.length;
-      let Progresscount=0;
-      for(let i=0;i<NoOfExercise;i++){
-        if(Progress?.exercises[i].sets.length!==0){
-          Progresscount=Progresscount+100/NoOfExercise;
+    // if(Progress && (!Progress?.isCompleted ||Progress?.isCompleted==false)){
+
+    //   res.status(200).json({ ProgressPercentage: 0 })
+
+    // }
+    if (Progress) {
+      let NoOfExercise = Progress?.exercises?.length;
+      let Progresscount = 0;
+      for (let i = 0; i < NoOfExercise; i++) {
+        if (Progress?.exercises[i].sets.length !== 0 &&(Progress?.exercises[i].sets[0]?.reps!==0 &&Progress?.exercises[i].sets[0]?.weight!==0)) {
+          Progresscount = Progresscount + (100 / NoOfExercise);
         }
 
       }
-      console.log('Progress',Progresscount)
-      res.status(200).json({ProgressPercentage:Progresscount})
+      console.log('Progress', Progresscount)
+      if(Progresscount==100){
+        Progress.isCompleted=true;
+        await Progress.save()
+      }
+      res.status(200).json({ ProgressPercentage: Progresscount })
 
 
 
-    }else{
-      res.status(200).json({ProgressPercentage:0})
+    } else {
+      res.status(200).json({ ProgressPercentage: 0 })
     }
 
-  }catch(err){
+  } catch (err) {
     console.log(err)
     return res.status(400).json({ error: true, message: err.message || "Something went wrong" });
 
@@ -348,37 +371,58 @@ const GetUserProgress=async (req,res)=>{
   }
 
 }
-const DailyWorkoutSessionUpdate=async (req,res)=>{
-  try{
-let {Date,ReqDay}=req?.body;
-console.log('Date',Date)
-console.log('ReqDay',ReqDay)
-    let User = await UserModel.findById(req?.user?.id)
-    console.log('User?.username',req?.user)
 
-    let result = await WorkoutRoutine.findOne({ username: User?.username })
+const DailyWorkoutSessionUpdate = async (req, res) => {
+  try {
+    const { Date, ReqDay } = req.body;
 
-console.log('Routin',result?.mon)
-if(result?.mon){
-  let Obj={
-    username:User?.username,
-    planType:"custom",
-    Title:result?.Title,
-    exercise:[
-     
-    ],
-    day:ReqDay
+    const user = await UserModel.findById(req.user.id);
+
+    const existingSession = await Session.findOne({
+      username: user.username,
+      day: ReqDay,
+      date: Date
+    });
+
+    if (existingSession) {
+      return res.status(200).json({ message: "session already exists" });
+    }
+
+    // get routine
+    const routine = await WorkoutRoutine.findOne({ username: user.username });
+
+    if (!routine || !routine.mon) {
+      return res.status(400).json({ message: "routine not found" });
+    }
+
+    const newSessionObj = {
+      username: user.username,
+      planType: "custom",
+      Title: routine[ReqDay].Title,
+      exercises: routine[ReqDay].exercises.map((ele) => ({
+        name: ele,
+        sets: [{ reps: 0, weight: 0 }]
+      })),
+      day: ReqDay,
+      date: Date
+    };
+
+    const created = await Session.create(newSessionObj);
+
+    return res.status(201).json({
+      message: "Session created",
+      session: created
+    });
+
+  } catch (err) {
+    console.log("err", err);
+    return res.status(400).json({
+      error: true,
+      message: err.message || "Something went wrong"
+    });
   }
+};
 
-
-
-}
-
-
-  }catch(err){
-
-  }
-}
 // const GetWorkoutBarChartDetail = async (req, res) => {
 //   try {
 
@@ -464,4 +508,4 @@ if(result?.mon){
 // }
 
 
-export {DailyWorkoutSessionUpdate, GetUserProgress,GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export { DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }

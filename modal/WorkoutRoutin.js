@@ -11,7 +11,7 @@ const DaySchema = new mongoose.Schema({
 
 const WorkoutRoutineSchema = new mongoose.Schema({
     userId:{type:ObjectId},
-    username:{type:String,default:'abhaykadu'},
+    username:{type:String,required:true},
   mon: { type: DaySchema, default: { day: "monday" } },
   tue: { type: DaySchema, default: { day: "tuesday" } },
   wed: { type: DaySchema, default: { day: "wednesday" } },
