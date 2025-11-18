@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json());
 import authrouter from './Router/authrouth.js';
 import WorkoutApi from './Router/WorkoutApi.js';
+import UserApi from './Router/userRoute.js';
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -44,6 +45,8 @@ mongoose.connect(MONGO_URI, {
 
 app.use('/', authrouter);
 app.use("/workout",WorkoutApi)
+app.use("/User",UserApi)
+
 app.get('/', (req, res) => {
   console.log('test route')
   res.send('App is listening');

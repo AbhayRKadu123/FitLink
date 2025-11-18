@@ -27,6 +27,22 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "WorkoutHistory",
     default: null
+  },
+  accounttype:{
+    type:String,
+    default:'public'
+  },
+  Posts:{
+    type:[mongoose.Schema.Types.ObjectId],
+    ref: "PostsSchema",
+    default: []
+
+  },
+  Friends:{
+     type:[mongoose.Schema.Types.ObjectId],
+    ref: "User",
+    default: []
+
   }
 });
 
