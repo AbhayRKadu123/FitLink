@@ -15,7 +15,7 @@ const Login=async (req, res) => {
 
     const token = jwt.sign({ id: user._id },'TOKEN', { expiresIn: "10h" });
     setTimeout(()=>{
-    res.status(200).json({ message: "Login successful", token,username:user?.username });
+    res.status(200).json({ message: "Login successful", token,username:user?.username,id:user?.id });
 
     },2000)
 

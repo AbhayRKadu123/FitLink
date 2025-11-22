@@ -43,6 +43,16 @@ const UserSchema = new mongoose.Schema({
     ref: "User",
     default: []
 
+  },
+  FriendRequest:{
+     type:[mongoose.Schema.Types.ObjectId],
+    ref: "User",
+    default: []
+
+  },
+  Bio:{
+    type:String,
+    default:'We Love Fitlin!'
   }
 });
 

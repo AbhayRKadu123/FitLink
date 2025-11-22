@@ -38,10 +38,25 @@ RecievedData.username=User?.username;
  
 }
 const Deleteworkoutroutin = async (req, res) => {
-
-  // console.log('data deleted ', req.body.id)
+  try{
+     // console.log('data deleted ', req.body.id)
   let result = await WorkoutRoutine.findByIdAndDelete(req.body.id)
+  let Result = await UserModel.findByIdAndUpdate(
+  req.user.id,
+  { $set: { planName: "" } },
+  { new: true } // returns updated document
+);
+
+  console.log("Result",Result)
   res.status(200).json({ result: 'deleted successfully' })
+
+
+  }catch(err){
+console.log(err)
+    res.status(500).json({msg:'server error'})
+  }
+
+ 
 }
 
 const Updateworkoutroutin = async (req, res) => {
