@@ -9,6 +9,8 @@ const Login=async (req, res) => {
     const user = await UserModel.findOne({ username });
 
     if (!user) return res.status(400).json({ message: "Invalid email or password" });
+    user.LoginCount=1;
+    await user?.save()
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(400).json({ message: "Invalid email or password" });

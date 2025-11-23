@@ -81,6 +81,7 @@ const Updateworkoutroutin = async (req, res) => {
     let updateddata = await result.save();
 
     // console.log("updateddata", updateddata)
+    res.status(200).json({ message: "Update Successfull" });
 
 
   } catch (error) {
@@ -94,9 +95,9 @@ const updateUserActiveWorkoutPlan = async (req, res) => {
 
     console.log('updateUserActiveWorkoutPlan', req?.body)
     let Id = req?.body?.Id;
-    let User = await UserModel.findByIdAndUpdate({ _id: req?.user?.id }, { $set: { ActiveWorkoutPlan: Id, planName: "CustomPlan" } })
+    let User = await UserModel.findByIdAndUpdate({ _id: req?.user?.id }, { $set: { ActiveWorkoutPlan: Id, planName: "CustomPlan",CustomWorkoutPlanActivated:true } })
     // console.log('Routin', User)
-
+    res.status(200).json({message:'Plan Activated'})
     // let 
   } catch (err) {
     res.status(500).json({ message: "Error updating workout", err });

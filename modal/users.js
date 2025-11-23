@@ -53,7 +53,16 @@ const UserSchema = new mongoose.Schema({
   Bio:{
     type:String,
     default:'We Love Fitlin!'
+  },
+  LoginCount:{
+    type:Number,
+    default:0
+  },
+  CustomWorkoutPlanActivated:{
+    type:Boolean,
+    default:false
   }
+
 });
 
 export const UserModel = mongoose.model("User", UserSchema);

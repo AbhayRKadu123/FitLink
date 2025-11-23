@@ -24,6 +24,7 @@ const getUserDetails = async (req, res) => {
                     planName: 1,
                     ActiveWorkoutPlan: 1,
                     WorkoutHistory: 1,
+                    LoginCount:1,
                     friendsCount: {
                         $size: { $ifNull: ["$Friends", []] }
                     },
