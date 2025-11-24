@@ -4,12 +4,15 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const Login=async (req, res) => {
   try {
-    const { username, password } = req.body;
-    
+   let { username, password } = req.body;
+
+    username=username.trim()
+    password=password.trim()
     const user = await UserModel.findOne({ username });
 
     if (!user) return res.status(400).json({ message: "Invalid email or password" });
     user.LoginCount=1;
+    
     await user?.save()
 
     const validPassword = await bcrypt.compare(password, user.password);
@@ -27,9 +30,11 @@ const Login=async (req, res) => {
 ;
 const SignUp=async(req,res)=>{
    try {
-    const { username, email, password } = req.body;
+    let { username, email, password } = req.body;
     console.log('signup',req.body)
-
+username=username.trim()
+email=email.trim()
+ password=password.trim()
     const existingUser = await UserModel.findOne({username });
     console.log('existingUser',existingUser)
     if (existingUser) return res.status(400).json({ message: "User already exists" });

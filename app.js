@@ -12,6 +12,7 @@ import WorkoutApi from './Router/WorkoutApi.js';
 import UserApi from './Router/userRoute.js';
 import path from "path";
 import { fileURLToPath } from "url";
+import WeightRouter from './Router/WeightRoute.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -48,7 +49,7 @@ mongoose.connect(MONGO_URI, {
 app.use('/', authrouter);
 app.use("/workout", WorkoutApi)
 app.use("/User", UserApi)
-
+app.use("/GetUserWeight",WeightRouter)
 app.get('/', (req, res) => {
   console.log('test route')
   res.send('App is listening');
