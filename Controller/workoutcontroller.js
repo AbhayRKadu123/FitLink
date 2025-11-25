@@ -19,44 +19,46 @@ let UserDetails = async (req, res) => {
 
 }
 const addcustomworkout = async (req, res) => {
-  try{
-//  console.log("req.body=", req.body.data)
-//   console.log("req.body=", req.body.data)
-let User = await UserModel.findById(req?.user?.id)
-let RecievedData=req?.body?.data;
-RecievedData.username=User?.username;
-  let Data = new WorkoutRoutine(RecievedData)
-  console.log('Data',Data)
-  let result = await Data.save();
-  console.log('result=',result)
+  try {
+    //  console.log("req.body=", req.body.data)
+    //   console.log("req.body=", req.body.data)
+    let User = await UserModel.findById(req?.user?.id)
+    let RecievedData = req?.body?.data;
+    RecievedData.username = User?.username;
+    let Data = new WorkoutRoutine(RecievedData)
+    console.log('Data', Data)
+    let result = await Data.save();
+    console.log('result=', result)
+setTimeout(()=>{
+    res.status(200).json({ message: "New Routin Created SuccessFully", val: result })
 
-  res.status(200).json({message:"New Routin Created SuccessFully", val: result })
-  }catch(err){
+},[1000])
+  } catch (err) {
     res.status(500).json({ message: "Error adding routin", err });
 
   }
- 
+
 }
 const Deleteworkoutroutin = async (req, res) => {
-  try{
-     // console.log('data deleted ', req.body.id)
-  let result = await WorkoutRoutine.findByIdAndDelete(req.body.id)
-  let Result = await UserModel.findByIdAndUpdate(
-  req.user.id,
-  { $set: { planName: "" } },
-  { new: true } // returns updated document
-);
+  try {
+    // console.log('data deleted ', req.body.id)
+    let result = await WorkoutRoutine.findByIdAndDelete(req.body.id)
+    let Result = await UserModel.findByIdAndUpdate(
+      req.user.id,
+      { $set: { planName: "" } },
+      { new: true } // returns updated document
+    );
 
-  console.log("Result",Result)
-  res.status(200).json({ result: 'deleted successfully' })
+    console.log("Result", Result)
+    res.status(200).json({ result: 'deleted successfully' })
 
 
-  }catch(err){
-console.log(err)
-    res.status(500).json({msg:'server error'})
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ msg: 'server error' })
   }
 
- 
+
 }
 
 const Updateworkoutroutin = async (req, res) => {
@@ -95,9 +97,9 @@ const updateUserActiveWorkoutPlan = async (req, res) => {
 
     console.log('updateUserActiveWorkoutPlan', req?.body)
     let Id = req?.body?.Id;
-    let User = await UserModel.findByIdAndUpdate({ _id: req?.user?.id }, { $set: { ActiveWorkoutPlan: Id, planName: "CustomPlan",CustomWorkoutPlanActivated:true } })
+    let User = await UserModel.findByIdAndUpdate({ _id: req?.user?.id }, { $set: { ActiveWorkoutPlan: Id, planName: "CustomPlan", CustomWorkoutPlanActivated: true } })
     // console.log('Routin', User)
-    res.status(200).json({message:'Plan Activated'})
+    res.status(200).json({ message: 'Plan Activated' })
     // let 
   } catch (err) {
     res.status(500).json({ message: "Error updating workout", err });
@@ -361,14 +363,14 @@ const GetUserProgress = async (req, res) => {
       let NoOfExercise = Progress?.exercises?.length;
       let Progresscount = 0;
       for (let i = 0; i < NoOfExercise; i++) {
-        if (Progress?.exercises[i].sets.length !== 0 &&(Progress?.exercises[i].sets[0]?.reps!==0 &&Progress?.exercises[i].sets[0]?.weight!==0)) {
+        if (Progress?.exercises[i].sets.length !== 0 && (Progress?.exercises[i].sets[0]?.reps !== 0 && Progress?.exercises[i].sets[0]?.weight !== 0)) {
           Progresscount = Progresscount + (100 / NoOfExercise);
         }
 
       }
       console.log('Progress', Progresscount)
-      if(Progresscount==100){
-        Progress.isCompleted=true;
+      if (Progresscount == 100) {
+        Progress.isCompleted = true;
         await Progress.save()
       }
       res.status(200).json({ ProgressPercentage: Progresscount })

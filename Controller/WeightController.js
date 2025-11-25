@@ -22,7 +22,7 @@ const GetAllWeightGraphandDetail = async (req, res) => {
     try {
         let User = await UserModel.findOne({ _id: req?.user?.id })
         console.log('User=', User)
-        let WeightData = await WeightTrackingTable.findMany({
+        let WeightData = await WeightTrackingTable.find({
             username:User?.username
         })
         console.log('WeightData', WeightData)
@@ -31,7 +31,8 @@ const GetAllWeightGraphandDetail = async (req, res) => {
         res.status(200).json({ message: 'fetch success full', data: WeightData })
 
     } catch (err) {
-        return res.status(500).json({ message: "Server Side Error" })
+        console.log(err)
+        return res.status(500).json({ message: "Server Side Error",err:err })
 
     }
 }
@@ -64,7 +65,10 @@ const AddWeight = async (req, res) => {
         )
         await userTodaysWt.save()
         console.log('AddWeight', req?.body)
+        // setTimeout(()=>{
         res.status(200).json({ message: 'weight tracked successfully' })
+
+     
 
     } catch (err) {
         return res.status(500).json({ message: "Server Side Error" })
