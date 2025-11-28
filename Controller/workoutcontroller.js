@@ -108,13 +108,30 @@ const updateUserActiveWorkoutPlan = async (req, res) => {
   }
 
 }
+function getISTDate() {
+  const dateInIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+  const d = new Date(dateInIST);
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 const AddWorkoutSession = async (req, res) => {
 
-  console.log('AddWorkoutSessionAddWorkoutSession=', req.body)
+  console.log('AddWorkoutSessionAddWorkoutSession=', req.user)
   try {
     // let result=await SessionSchema(req?.body)
     // res.send(result)
     let Id = req?.body?.Id;
+    let User=await UserModel.findOne({_id:req?.user?.id})
+    // getISTDate
+    let Res=await Session.findOne({username:User,date:getISTDate()})
+    if(Res){
+      return res.status(409).json({ message: 'Session Already Exist' })
+    }
     if (Id) {
       let resullt = await Session.findById(Id)
       if (resullt) return res.status(409).json({ message: 'Session Already Exist' })
