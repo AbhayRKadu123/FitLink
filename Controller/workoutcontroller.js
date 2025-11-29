@@ -108,17 +108,17 @@ const updateUserActiveWorkoutPlan = async (req, res) => {
   }
 
 }
-function getISTDate() {
-  const dateInIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-  const d = new Date(dateInIST);
+ function getFormattedToday() {
+  // const utcNow = new Date().toISOString();
+  const utcDate = new Date();
+  console.log('utcDate',utcDate)
+const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+console.log('isodate',istDate.toISOString()?.split('T')[0]);
 
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  return istDate.toISOString()?.split('T')[0]
 }
 
+// getFormattedToday()
 const AddWorkoutSession = async (req, res) => {
 
   console.log('AddWorkoutSessionAddWorkoutSession=', req.user)
@@ -128,7 +128,7 @@ const AddWorkoutSession = async (req, res) => {
     let Id = req?.body?.Id;
     let User=await UserModel.findOne({_id:req?.user?.id})
     // getISTDate
-    let Res=await Session.findOne({username:User,date:getISTDate()})
+    let Res=await Session.findOne({username:User,date:getFormattedToday()})
     if(Res){
       return res.status(409).json({ message: 'Session Already Exist' })
     }
@@ -366,16 +366,11 @@ const GetWorkoutBarChartDetail = async (req, res) => {
 const GetUserProgress = async (req, res) => {
 
   try {
-    console.log('req.query', req.query.Date)
+    console.log('req.query date in progressbar', req.query.Date)
     let Date = req.query.Date
     let User = await UserModel.findById(req?.user?.id)
     let Progress = await Session.findOne({ date: Date, username: User?.username })
-    // console.log('Progress',Progress?.exercises)s
-    // if(Progress && (!Progress?.isCompleted ||Progress?.isCompleted==false)){
-
-    //   res.status(200).json({ ProgressPercentage: 0 })
-
-    // }
+  
     if (Progress) {
       let NoOfExercise = Progress?.exercises?.length;
       let Progresscount = 0;

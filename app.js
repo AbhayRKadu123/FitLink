@@ -54,9 +54,9 @@ app.get('/', (req, res) => {
   console.log('test route')
   res.send('App is listening');
 });
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
+// app.get(/.*/, (req, res) => {
+//   res.sendFile(path.join(__dirname, "dist", "index.html"));
+// });
 const server = http.createServer(app);
 
 // Attach socket server

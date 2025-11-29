@@ -80,6 +80,7 @@ const AddFriendUser = async (req, res) => {
             
             let NotifyReciver = new AllNotification({
                 userId: req.body?.userId,
+                username:ReciverUser?.username,
                 senderId: req?.user?.id,
                 ReciverUser: ReciverUser?.username,
                 senderUserName: Sender?.username,
@@ -89,6 +90,8 @@ const AddFriendUser = async (req, res) => {
             })
             let NotifySender = new AllNotification({
                 userId: req?.user?.id,
+                username:Sender?.username,
+
                 senderId: req?.body?.userId,
                 ReciverUser: Sender?.username,
                 senderUserName: ReciverUser?.username,
@@ -116,7 +119,7 @@ const AddFriendUser = async (req, res) => {
 
 const GetAllFriendRequest = async (req, res) => {
     try {
-
+       
 
     } catch (err) {
         res.status(500).json({ message: err })
@@ -173,6 +176,35 @@ const GetUserFeed = async (req, res) => {
 }
 
 const UserNotification = async (req, res) => {
+    try{
+    console.log('UserNotification')
+     let user=await UserModel.findOne({_id:req?.user?.id})
+        
+
+  let Result = await AllNotification.aggregate([
+  { $match: { username: user?.username } },
+  {
+    $project: {
+      _id: 1,
+      userId: 1,
+      username: 1,
+      senderId: 1,
+      senderUserName: 1,
+      type: 1,
+      message: 1,
+      isRead: 1,
+      createdAt: 1
+    }
+  }
+])
+
+    console.log('Result',Result)
+    res.status(200).json({msg: Result})
+
+    }catch(err){
+console.log(err)
+res.status(500).json({Err:err})
+    }
 
 }
-export { getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest }
+export {UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest }
