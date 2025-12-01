@@ -1,6 +1,7 @@
 import { UserModel } from "../modal/users.js";
 import mongoose from "mongoose";
 import { AllNotification } from "../modal/NotificationSchema.js";
+import { MessageStorage } from "../modal/MessageSchema.js";
 const getUserDetails = async (req, res) => {
     try {
         let id
@@ -24,7 +25,7 @@ const getUserDetails = async (req, res) => {
                     planName: 1,
                     ActiveWorkoutPlan: 1,
                     WorkoutHistory: 1,
-                    LoginCount:1,
+                    LoginCount: 1,
                     friendsCount: {
                         $size: { $ifNull: ["$Friends", []] }
                     },
@@ -70,17 +71,17 @@ const AddFriendUser = async (req, res) => {
 
         let ReciverUser = await UserModel.findOne({ _id: req.body?.userId })
         let Sender = await UserModel.findOne({ _id: req?.user?.id })
-        console.log('Sender',Sender?.username)
-        console.log('Reciver',ReciverUser?.username)
+        console.log('Sender', Sender?.username)
+        console.log('Reciver', ReciverUser?.username)
 
         if (ReciverUser && ReciverUser?.accounttype == 'public') {
             console.log('public acc query')
             let ReciverResult = await UserModel.findOneAndUpdate({ _id: req.body?.userId }, { $addToSet: { Friends: req?.user?.id } })
             let SenderResult = await UserModel.findOneAndUpdate({ _id: req?.user?.id }, { $addToSet: { Friends: ReciverUser?._id } })
-            
+
             let NotifyReciver = new AllNotification({
                 userId: req.body?.userId,
-                username:ReciverUser?.username,
+                username: ReciverUser?.username,
                 senderId: req?.user?.id,
                 ReciverUser: ReciverUser?.username,
                 senderUserName: Sender?.username,
@@ -90,7 +91,7 @@ const AddFriendUser = async (req, res) => {
             })
             let NotifySender = new AllNotification({
                 userId: req?.user?.id,
-                username:Sender?.username,
+                username: Sender?.username,
 
                 senderId: req?.body?.userId,
                 ReciverUser: Sender?.username,
@@ -119,7 +120,7 @@ const AddFriendUser = async (req, res) => {
 
 const GetAllFriendRequest = async (req, res) => {
     try {
-       
+
 
     } catch (err) {
         res.status(500).json({ message: err })
@@ -176,35 +177,78 @@ const GetUserFeed = async (req, res) => {
 }
 
 const UserNotification = async (req, res) => {
-    try{
-    console.log('UserNotification')
-     let user=await UserModel.findOne({_id:req?.user?.id})
-        
+    try {
+        console.log('UserNotification')
+        let user = await UserModel.findOne({ _id: req?.user?.id })
 
-  let Result = await AllNotification.aggregate([
-  { $match: { username: user?.username } },
-  {
-    $project: {
-      _id: 1,
-      userId: 1,
-      username: 1,
-      senderId: 1,
-      senderUserName: 1,
-      type: 1,
-      message: 1,
-      isRead: 1,
-      createdAt: 1
-    }
-  }
-])
 
-    console.log('Result',Result)
-    res.status(200).json({msg: Result})
+        let Result = await AllNotification.aggregate([
+            { $match: { username: user?.username } },
+            {
+                $project: {
+                    _id: 1,
+                    userId: 1,
+                    username: 1,
+                    senderId: 1,
+                    senderUserName: 1,
+                    type: 1,
+                    message: 1,
+                    isRead: 1,
+                    createdAt: 1
+                }
+            }
+        ])
 
-    }catch(err){
-console.log(err)
-res.status(500).json({Err:err})
+        console.log('Result', Result)
+        res.status(200).json({ msg: Result })
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ Err: err })
     }
 
 }
-export {UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest }
+
+const GetAllUserConversation = async (req, res) => {
+    try {
+        function createConversationId(user1, user2) {
+            return [user1, user2].sort().join("_");
+        }
+        let { UserId, OtherUserId } = req?.query;
+        let ConversationId = createConversationId(UserId, OtherUserId)
+        let result = await MessageStorage.aggregate([
+            { $match: { conversationId: ConversationId } },
+            {$sort: { createdAt: 1 }},
+            {
+                $project: {
+                    senderId: 1,
+                    receiverId: 1,
+                    message: 1,
+
+                    messageType: 1,
+
+                    SenderUsername: 1,
+
+                    ReciverUsername: 1,
+
+                    isRead: 1,
+
+                    conversationId: 1,
+
+                    time: 1,
+
+                    date: 1
+
+
+                }
+            }
+
+        ])
+        res.status(200).json({ result: result })
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ Err: err })
+
+    }
+}
+export { UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
