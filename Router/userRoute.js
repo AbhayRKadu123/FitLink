@@ -1,5 +1,5 @@
 import express from 'express'
-import {UserNotification, getUserDetails,GetUserFeed,AddFriendUser,GetAllFriendRequest,GetAllUserConversation} from '../Controller/userController.js';
+import {UserNotification,HandleDeleteMessage, getUserDetails,GetUserFeed,AddFriendUser,GetAllFriendRequest,GetAllUserConversation} from '../Controller/userController.js';
 import { verifyToken } from "../MiddleWare/VerifyToken.js";
 
 const UserApi = express.Router(); // ✅ create router instance
@@ -11,5 +11,7 @@ UserApi.put("/AddFriendUser",verifyToken,AddFriendUser)
 UserApi.get("/GetAllFriendRequest",verifyToken,GetAllFriendRequest)
 UserApi.get("/UserNotifications",verifyToken,UserNotification)
 UserApi.get("/GetAllUserConversation",verifyToken,GetAllUserConversation)
+// HandleDeleteMessage
+UserApi.delete("/HandleDeleteMessage",HandleDeleteMessage)
 
 export default UserApi;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

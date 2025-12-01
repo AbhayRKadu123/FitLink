@@ -251,4 +251,15 @@ const GetAllUserConversation = async (req, res) => {
 
     }
 }
-export { UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
+const HandleDeleteMessage=async (req,res)=>{
+    try{
+console.log('HandleDeleteMessage')
+
+    }catch(err){
+        res.status(500).json({ Err: err })
+
+
+    }
+
+}
+export { HandleDeleteMessage,UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
