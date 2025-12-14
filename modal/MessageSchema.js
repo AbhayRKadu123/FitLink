@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const MessageSchema = new mongoose.Schema(
   {
@@ -43,6 +44,16 @@ const MessageSchema = new mongoose.Schema(
     date: {
       type: String, // example: "2025-02-12"
     },
+    isDeleted:{
+      type:Boolean,
+      default:false
+    },
+    replyTo: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Message",
+  default: null
+}
+
   },
   { timestamps: true } // auto adds createdAt, updatedAt
 );

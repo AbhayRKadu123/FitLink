@@ -62,12 +62,15 @@ async function saveMessage(data) {
     message: data.message,
     conversationId,
     time: data.time, // optional
-    date: data.date, // optional
+    date: data.date,
+    replyTo: data?.ReplyId || null // optional
   });
 
   await newMessage.save();
 }
-
+app.get("/keeprouteactive",(req,res)=>{
+res.status(200).json({msg:'keep route active'})
+})
 app.use('/', authrouter);
 app.use("/workout", WorkoutApi)
 app.use("/User", UserApi)
@@ -87,7 +90,7 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"],
     pingInterval: 10000,
-  pingTimeout: 5000
+    pingTimeout: 5000
   }
 });
 let users = {}
@@ -104,7 +107,8 @@ io.on("connection", (socket) => {
     socket.to(users[Data.Id]).emit("IncommingNotification", { NotificationType: 'FriendRequest', from: Data?.CurrId })
   })
   socket.on("SendMessage", async (Msg) => {
-    const { msg, SenderId, ReciverId,Date,Time } = Msg
+    const { msg, SenderId, ReciverId, Date, Time, ReplyId, ImageUrl } = Msg
+    console.log('SelectedFile=',ImageUrl)
     let ReciverUserName = await UserModel.findOne({ _id: ReciverId })
     let SenderUsername = await UserModel.findOne({ _id: SenderId })
     let Data = {
@@ -117,8 +121,12 @@ io.on("connection", (socket) => {
       time: Time, // optional
       date: Date // optional}
     }
+    if (ReplyId) {
+      Data['ReplyId'] = ReplyId;
+
+    }
     saveMessage(Data)
-    socket.to(users[ReciverId]).emit('IncommingMsg', { msg: msg, Sender: SenderId, Reciver: ReciverId, ReciverUsername: ReciverUserName?.username, SenderUsername: SenderUsername?.username,Date:Date,Time:Time })
+    socket.to(users[ReciverId]).emit('IncommingMsg', { msg: msg, Sender: SenderId, Reciver: ReciverId, ReciverUsername: ReciverUserName?.username, SenderUsername: SenderUsername?.username, Date: Date, Time: Time })
 
 
     // console.log('msg sending',msg)

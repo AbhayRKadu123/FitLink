@@ -61,6 +61,11 @@ const UserSchema = new mongoose.Schema({
   CustomWorkoutPlanActivated:{
     type:Boolean,
     default:false
+  },
+  isPremium:{
+    type:Boolean,
+    default:false
+
   }
 
 });

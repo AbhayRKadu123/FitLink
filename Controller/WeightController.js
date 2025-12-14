@@ -53,7 +53,7 @@ const AddWeight = async (req, res) => {
         }
         let CheckEnteryExists = await WeightTrackingTable.findOne({ userId: req?.user?.id, TodaysDate: TodaysDate })
         if (CheckEnteryExists) {
-            return res.status(409).json({ message: 'Weight Have Been Logged Already' })
+            return res.status(400).json({ message: 'Weight Have Been Logged Already' })
         }
         let userTodaysWt = new WeightTrackingTable(
             {

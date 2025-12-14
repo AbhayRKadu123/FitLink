@@ -40,7 +40,9 @@ const getUserDetails = async (req, res) => {
                             { $toObjectId: req.user.id },
                             { $ifNull: ["$FriendRequest", []] }
                         ]
-                    }
+                    },
+                    isPremium:1
+
                 }
             });
 
@@ -218,7 +220,24 @@ const GetAllUserConversation = async (req, res) => {
         let ConversationId = createConversationId(UserId, OtherUserId)
         let result = await MessageStorage.aggregate([
             { $match: { conversationId: ConversationId } },
-            {$sort: { createdAt: 1 }},
+            { $sort: { createdAt: 1 } },
+            {
+                $lookup: {
+                    from: "messages",
+
+                    localField: "replyTo",
+                    foreignField: "_id",
+                    as: "replyMessage"
+                }
+            }
+            ,
+
+            {
+                $unwind: {
+                    path: "$replyMessage",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
             {
                 $project: {
                     senderId: 1,
@@ -237,7 +256,11 @@ const GetAllUserConversation = async (req, res) => {
 
                     time: 1,
 
-                    date: 1
+                    date: 1,
+
+                    isDeleted: 1,
+                    replyTo: 1,
+                    replyMessage: 1
 
 
                 }
@@ -251,15 +274,25 @@ const GetAllUserConversation = async (req, res) => {
 
     }
 }
-const HandleDeleteMessage=async (req,res)=>{
-    try{
-console.log('HandleDeleteMessage')
+const GetReplyMessage = async (req, res) => {
+    res.status(200).json({ message: 'Reply' })
+}
+const HandleDeleteMessage = async (req, res) => {
+    try {
+        console.log('HandleDeleteMessage', req?.body?.userId)
+        let Result = await MessageStorage.findByIdAndUpdate({ _id: req?.body?.userId }, { $set: { isDeleted: true } })
+        console.log('Result', Result)
 
-    }catch(err){
+        res.status(200).json({ msg: 'msg deleted success fully', Result: Result })
+    } catch (err) {
         res.status(500).json({ Err: err })
 
 
     }
 
 }
-export { HandleDeleteMessage,UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
+const UploadImage = (req, res) => {
+    console.log('upload image')
+    res.json({ UploadImage:  req.file.path })
+}
+export { UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
