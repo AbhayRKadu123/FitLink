@@ -15,15 +15,23 @@ cloudinary.v2.config({
 });
 
 // Storage config
+// const storage = new CloudinaryStorage({
+//   cloudinary: cloudinary.v2,
+//   params: {
+//     folder: "UserMessageImage",
+//     format: async () => "png",
+//     public_id: (req, file) => {
+//       return file.originalname.split(".")[0];
+//     },
+//   },
+// });
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary.v2,
-  params: {
+  params: async (req, file) => ({
     folder: "UserMessageImage",
-    format: async () => "png",
-    public_id: (req, file) => {
-      return file.originalname.split(".")[0];
-    },
-  },
+    resource_type: "image",
+    public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
+  }),
 });
 
 // Multer middleware

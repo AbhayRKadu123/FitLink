@@ -93,8 +93,8 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
-    pingInterval: 10000,
-    pingTimeout: 5000
+     pingInterval: 25000,
+  pingTimeout: 20000
   }
 });
 let users = {}
@@ -109,6 +109,10 @@ io.on("connection", (socket) => {
   socket.on("Notification", (Data) => {
     console.log('NotificationnData', Data)
     socket.to(users[Data.Id]).emit("IncommingNotification", { NotificationType: 'FriendRequest', from: Data?.CurrId })
+  })
+  socket.on("istyping",(Data)=>{
+    console.log('istyping data',Data)
+    socket.to(users[Data.Id]).emit('IsTyping',{msg:`${Data?.username} is typing..`})
   })
   socket.on("SendMessage", async (Msg) => {
     const { msg, SenderId, ReciverId, Date, Time, ReplyId, ImageUrl,UniqueMessageId,RepliedToUniqueMessageId,RepliedToImage,replyMessage} = Msg
@@ -134,8 +138,11 @@ io.on("connection", (socket) => {
 
     }
     saveMessage(Data)
-    socket.to(users[ReciverId]).emit('IncommingMsg', { msg: msg, Sender: SenderId, Reciver: ReciverId, ReciverUsername: ReciverUserName?.username, SenderUsername: SenderUsername?.username, Date: Date, Time: Time,ImageUrl:ImageUrl,UniqueMessageId:UniqueMessageId,replyMessage:replyMessage,RepliedToImage:RepliedToImage })
+    const receiverSocketId = users[ReciverId];
 
+if (receiverSocketId) {
+    socket.to(receiverSocketId).emit('IncommingMsg', { msg: msg, Sender: SenderId, Reciver: ReciverId, ReciverUsername: ReciverUserName?.username, SenderUsername: SenderUsername?.username, Date: Date, Time: Time,ImageUrl:ImageUrl,UniqueMessageId:UniqueMessageId,replyMessage:replyMessage,RepliedToImage:RepliedToImage })
+}
 
     // console.log('msg sending',msg)
   })
