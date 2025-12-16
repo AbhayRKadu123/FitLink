@@ -63,13 +63,17 @@ async function saveMessage(data) {
     conversationId,
     time: data.time, // optional
     date: data.date,
-    replyTo: data?.ReplyId || null // optional
+    replyTo: data?.ReplyId || null, // optional
+    ImageUrl:data?.ImageUrl,
+    UniqueMessageId:data?.UniqueMessageId,
+    RepliedToUniqueMessageId:data?.RepliedToUniqueMessageId,
+    RepliedToImage:data?.RepliedToImage
   });
 
   await newMessage.save();
 }
-app.get("/keeprouteactive",(req,res)=>{
-res.status(200).json({msg:'keep route active'})
+app.get("/keeprouteactive", (req, res) => {
+  res.status(200).json({ msg: 'keep route active' })
 })
 app.use('/', authrouter);
 app.use("/workout", WorkoutApi)
@@ -107,8 +111,8 @@ io.on("connection", (socket) => {
     socket.to(users[Data.Id]).emit("IncommingNotification", { NotificationType: 'FriendRequest', from: Data?.CurrId })
   })
   socket.on("SendMessage", async (Msg) => {
-    const { msg, SenderId, ReciverId, Date, Time, ReplyId, ImageUrl } = Msg
-    console.log('SelectedFile=',ImageUrl)
+    const { msg, SenderId, ReciverId, Date, Time, ReplyId, ImageUrl,UniqueMessageId,RepliedToUniqueMessageId,RepliedToImage,replyMessage} = Msg
+    console.log('RepliedToUniqueMessageId=', RepliedToImage)
     let ReciverUserName = await UserModel.findOne({ _id: ReciverId })
     let SenderUsername = await UserModel.findOne({ _id: SenderId })
     let Data = {
@@ -117,16 +121,20 @@ io.on("connection", (socket) => {
       SenderUsername: SenderUsername?.username,
       ReciverUsername: ReciverUserName?.username,
       message: msg,
-      // conversationId,
-      time: Time, // optional
-      date: Date // optional}
+      
+      time: Time, 
+      date: Date ,
+      ImageUrl,
+      UniqueMessageId:UniqueMessageId,
+      RepliedToImage,
+      RepliedToUniqueMessageId:RepliedToUniqueMessageId
     }
     if (ReplyId) {
       Data['ReplyId'] = ReplyId;
 
     }
     saveMessage(Data)
-    socket.to(users[ReciverId]).emit('IncommingMsg', { msg: msg, Sender: SenderId, Reciver: ReciverId, ReciverUsername: ReciverUserName?.username, SenderUsername: SenderUsername?.username, Date: Date, Time: Time })
+    socket.to(users[ReciverId]).emit('IncommingMsg', { msg: msg, Sender: SenderId, Reciver: ReciverId, ReciverUsername: ReciverUserName?.username, SenderUsername: SenderUsername?.username, Date: Date, Time: Time,ImageUrl:ImageUrl,UniqueMessageId:UniqueMessageId,replyMessage:replyMessage,RepliedToImage:RepliedToImage })
 
 
     // console.log('msg sending',msg)

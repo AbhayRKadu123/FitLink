@@ -13,7 +13,7 @@ const MessageSchema = new mongoose.Schema(
     },
     message: {
       type: String,
-      required: true,
+      
     },
     messageType: {
       type: String,
@@ -47,6 +47,20 @@ const MessageSchema = new mongoose.Schema(
     isDeleted:{
       type:Boolean,
       default:false
+    },
+    ImageUrl:{
+      type:String
+
+    },
+    UniqueMessageId:{
+      type:String
+
+    },
+    RepliedToUniqueMessageId:{
+ type:String
+    },
+    RepliedToImage:{
+type:String
     },
     replyTo: {
   type: mongoose.Schema.Types.ObjectId,

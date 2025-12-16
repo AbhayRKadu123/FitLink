@@ -225,8 +225,8 @@ const GetAllUserConversation = async (req, res) => {
                 $lookup: {
                     from: "messages",
 
-                    localField: "replyTo",
-                    foreignField: "_id",
+                    localField: "RepliedToUniqueMessageId",
+                    foreignField: "UniqueMessageId",
                     as: "replyMessage"
                 }
             }
@@ -260,7 +260,11 @@ const GetAllUserConversation = async (req, res) => {
 
                     isDeleted: 1,
                     replyTo: 1,
-                    replyMessage: 1
+                    replyMessage: 1,
+                    RepliedToImage:1,
+                    ImageUrl:1,
+                    UniqueMessageId:1,
+                    RepliedToUniqueMessageId:1
 
 
                 }
