@@ -30,6 +30,12 @@ const Login=async (req, res) => {
 ;
 const SignUp=async(req,res)=>{
    try {
+    const userlst = await UserModel.find()
+    if(userlst.length>5){
+      return res.status(400).json({ message: "Registration full" });
+
+    }
+    console.log('userlst',userlst)
     let { username, email, password } = req.body;
     console.log('signup',req.body)
 username=username.trim()
