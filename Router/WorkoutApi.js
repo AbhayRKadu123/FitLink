@@ -1,5 +1,5 @@
 import express from "express"
-import {DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
+import {GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
 
 
  } from "../Controller/workoutcontroller.js";
@@ -12,6 +12,7 @@ WorkoutApi.get("/getUserExercise",verifyToken,UserDetails)
 WorkoutApi.post("/CustomWorkout",verifyToken,addcustomworkout)
 // "/Workout/DeleteRoutin"
 WorkoutApi.delete("/DeleteRoutin",verifyToken,Deleteworkoutroutin)
+WorkoutApi.get("/GetLastSessionHistory",GetLastSessionHistory)
 // /workout/UpdateRoutin/:id
 WorkoutApi.put("/UpdateRoutin/:id",verifyToken,Updateworkoutroutin)
 WorkoutApi.put("/updateUserActiveWorkoutPlan",verifyToken,updateUserActiveWorkoutPlan)

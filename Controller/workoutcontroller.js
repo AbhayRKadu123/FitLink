@@ -29,10 +29,10 @@ const addcustomworkout = async (req, res) => {
     console.log('Data', Data)
     let result = await Data.save();
     console.log('result=', result)
-setTimeout(()=>{
-    res.status(200).json({ message: "New Routin Created SuccessFully", val: result })
+    setTimeout(() => {
+      res.status(200).json({ message: "New Routin Created SuccessFully", val: result })
 
-},[1000])
+    }, [1000])
   } catch (err) {
     res.status(500).json({ message: "Error adding routin", err });
 
@@ -108,12 +108,12 @@ const updateUserActiveWorkoutPlan = async (req, res) => {
   }
 
 }
- function getFormattedToday() {
+function getFormattedToday() {
   // const utcNow = new Date().toISOString();
   const utcDate = new Date();
-  console.log('utcDate',utcDate)
-const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
-console.log('isodate',istDate.toISOString()?.split('T')[0]);
+  console.log('utcDate', utcDate)
+  const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+  console.log('isodate', istDate.toISOString()?.split('T')[0]);
 
   return istDate.toISOString()?.split('T')[0]
 }
@@ -126,10 +126,10 @@ const AddWorkoutSession = async (req, res) => {
     // let result=await SessionSchema(req?.body)
     // res.send(result)
     let Id = req?.body?.Id;
-    let User=await UserModel.findOne({_id:req?.user?.id})
+    let User = await UserModel.findOne({ _id: req?.user?.id })
     // getISTDate
-    let Res=await Session.findOne({username:User,date:getFormattedToday()})
-    if(Res){
+    let Res = await Session.findOne({ username: User, date: getFormattedToday() })
+    if (Res) {
       return res.status(409).json({ message: 'Session Already Exist' })
     }
     if (Id) {
@@ -370,7 +370,7 @@ const GetUserProgress = async (req, res) => {
     let Date = req.query.Date
     let User = await UserModel.findById(req?.user?.id)
     let Progress = await Session.findOne({ date: Date, username: User?.username })
-  
+
     if (Progress) {
       let NoOfExercise = Progress?.exercises?.length;
       let Progresscount = 0;
@@ -452,6 +452,54 @@ const DailyWorkoutSessionUpdate = async (req, res) => {
     });
   }
 };
+
+const GetLastSessionHistory = async (req, res) => {
+  console.log('Last session history', req?.query)
+
+  try {
+    let { SessionTitle, Currexercise, Day } = req?.query;
+  Currexercise = Currexercise.trim().toLowerCase();
+
+    if (!SessionTitle || !Currexercise || !Day) {
+      return null
+    }
+    const today = getFormattedToday();
+    let User = await UserModel.findById(req?.user?.id)
+    //  Title: SessionTitle,
+    //       date: { $lt: today },
+    //       day: Day
+    let result = await Session.aggregate([{ $match: { Title: SessionTitle, 
+      date: { $ne: today }, day: { $eq: Day } } },
+       { $limit: 1 },
+       {$project:{
+        exercises:{$filter:{
+          input:"$exercises",
+          as:"ex",
+          cond:{
+            $eq:[
+              {$toLower:"$$ex.name"},
+              Currexercise
+
+            ]
+          }
+
+
+        }}
+       }}
+
+
+    ])
+      .sort({ date: -1 });
+
+
+    res.status(200).json({ result: result })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ message: 'something went wrong' })
+
+  }
+
+}
 
 // const GetWorkoutBarChartDetail = async (req, res) => {
 //   try {
@@ -538,4 +586,4 @@ const DailyWorkoutSessionUpdate = async (req, res) => {
 // }
 
 
-export { DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export { GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
