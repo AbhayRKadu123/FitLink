@@ -458,7 +458,7 @@ const GetLastSessionHistory = async (req, res) => {
 
   try {
     let { SessionTitle, Currexercise, Day } = req?.query;
-  Currexercise = Currexercise.trim().toLowerCase();
+    Currexercise = Currexercise.trim().toLowerCase();
 
     if (!SessionTitle || !Currexercise || !Day) {
       return null
@@ -468,24 +468,32 @@ const GetLastSessionHistory = async (req, res) => {
     //  Title: SessionTitle,
     //       date: { $lt: today },
     //       day: Day
-    let result = await Session.aggregate([{ $match: { Title: SessionTitle, 
-      date: { $ne: today }, day: { $eq: Day } } },
-       { $limit: 1 },
-       {$project:{
-        exercises:{$filter:{
-          input:"$exercises",
-          as:"ex",
-          cond:{
-            $eq:[
-              {$toLower:"$$ex.name"},
-              Currexercise
+    let result = await Session.aggregate([{
+      $match: {
+        Title: SessionTitle,
+        date: { $ne: today }, day: { $eq: Day }
+      }
+    },
+    { $limit: 1 },
+    {
+      $project: {
+        exercises: {
+          $filter: {
+            input: "$exercises",
+            as: "ex",
+            cond: {
+              $eq: [
+                { $toLower: "$$ex.name" },
+                Currexercise
 
-            ]
+              ]
+            }
+
+
           }
-
-
-        }}
-       }}
+        }
+      }
+    }
 
 
     ])

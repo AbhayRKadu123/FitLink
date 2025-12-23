@@ -15,6 +15,8 @@ import { fileURLToPath } from "url";
 import WeightRouter from './Router/WeightRoute.js';
 import { UserModel } from './modal/users.js';
 import { MessageStorage } from './modal/MessageSchema.js';
+import "./utils/CronsJob.js"
+import NotificationRouter from "./Router/SendPushNotification.js"
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -77,6 +79,7 @@ app.get("/keeprouteactive", (req, res) => {
 })
 app.use('/', authrouter);
 app.use("/workout", WorkoutApi)
+app.use("/pushnotification",NotificationRouter)
 app.use("/User", UserApi)
 app.use("/GetUserWeight", WeightRouter)
 app.get('/', (req, res) => {
