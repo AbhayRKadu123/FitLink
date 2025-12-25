@@ -151,7 +151,7 @@ const AddWorkoutSession = async (req, res) => {
 const UpdateWorkoutSession = async (req, res) => {
   try {
 
-    console.log('req.body', req.body)
+    console.log('req.body', req.body?.exercises[0]?.sets)
     let { username,
       planType,
       Title,
@@ -373,13 +373,22 @@ const GetUserProgress = async (req, res) => {
 
     if (Progress) {
       let NoOfExercise = Progress?.exercises?.length;
-      let Progresscount = 0;
-      for (let i = 0; i < NoOfExercise; i++) {
-        if (Progress?.exercises[i].sets.length !== 0 && (Progress?.exercises[i].sets[0]?.reps !== 0 && Progress?.exercises[i].sets[0]?.weight !== 0)) {
-          Progresscount = Progresscount + (100 / NoOfExercise);
-        }
+    let Progresscount = 0;
 
-      }
+for (let i = 0; i < NoOfExercise; i++) {
+  const sets = Progress?.exercises[i]?.sets;
+  if (!sets || sets.length === 0) continue;
+
+  const completedSets = sets.filter(
+    set => set?.reps > 0 && set?.weight > 0 &&set?.isSetCompleted
+  ).length;
+
+  const exerciseProgress = (completedSets / sets.length) * (100 / NoOfExercise);
+
+  Progresscount += exerciseProgress;
+}
+
+
       console.log('Progress', Progresscount)
       if (Progresscount == 100) {
         Progress.isCompleted = true;
@@ -452,6 +461,34 @@ const DailyWorkoutSessionUpdate = async (req, res) => {
     });
   }
 };
+const GetAllExercisesLastSessionHistory = async (req, res) => {
+
+  try {
+    let { SessionTitle, Day } = req?.query;
+    if (!SessionTitle || !Day) {
+      return null
+    }
+      const today = getFormattedToday();
+    let User = await UserModel.findById(req?.user?.id)
+    let result = await Session.findOne({
+  day: Day,
+  date: { $lt: today } // strictly before today
+}).sort({ date: -1 });
+
+res.status(200).json({result:result})
+
+
+
+  } catch (err) {
+
+    res.status(500).json({ message: 'something went wrong' })
+
+
+
+  }
+
+
+}
 
 const GetLastSessionHistory = async (req, res) => {
   console.log('Last session history', req?.query)
@@ -507,6 +544,24 @@ const GetLastSessionHistory = async (req, res) => {
 
   }
 
+}
+const UpdateUserWorkoutHistory = async (req, res) => {
+  try {
+
+    let Exercises = req?.body?.Exercises;
+    let id = req?.body?.id;
+    let Sessionn = await Session.findByIdAndUpdate({ _id: id }, { $set: { exercises: Exercises } })
+    console.log(Sessionn)
+    res.status(200).json({ message: 'Update successfull' })
+
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).json({ message: 'something went wrong' })
+
+  }
+
+  // console.log(req.body)
 }
 
 // const GetWorkoutBarChartDetail = async (req, res) => {
@@ -594,4 +649,4 @@ const GetLastSessionHistory = async (req, res) => {
 // }
 
 
-export { GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export {GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }

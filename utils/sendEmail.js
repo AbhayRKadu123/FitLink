@@ -11,11 +11,14 @@ export async function sendEmail(to, subject, message) {
     // 1. Create transporter (use your email service credentials)
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com', // For Gmail
-      port: 587,
-      secure: false, // true for 465, false for other ports
+       port: 465,
+      secure: true, // ✅ important
       auth: {
         user: 'abhaykadu2201@gmail.com',      // your email
         pass: 'ahow pfih mrsw gani' // Gmail App Password if using Gmail
+      },
+       tls: {
+        rejectUnauthorized: false, // helps avoid Render TLS issues
       },
     });
 

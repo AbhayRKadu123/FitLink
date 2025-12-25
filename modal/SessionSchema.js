@@ -3,7 +3,8 @@ import { type } from "os";
 
 const SetSchema = new mongoose.Schema({
   reps: { type: Number },
-  weight: { type: Number}, // in kg or lbs
+  weight: { type: Number},
+  isSetCompleted:{type:Boolean,default:false}// in kg or lbs
 });
 
 const ExerciseSchema = new mongoose.Schema({

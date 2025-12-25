@@ -1,5 +1,5 @@
 import express from "express"
-import {GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
+import {GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
 
 
  } from "../Controller/workoutcontroller.js";
@@ -14,6 +14,8 @@ WorkoutApi.post("/CustomWorkout",verifyToken,addcustomworkout)
 WorkoutApi.delete("/DeleteRoutin",verifyToken,Deleteworkoutroutin)
 WorkoutApi.get("/GetLastSessionHistory",GetLastSessionHistory)
 // /workout/UpdateRoutin/:id
+WorkoutApi.put("/UpdateUserWorkoutHistory",verifyToken,UpdateUserWorkoutHistory)
+WorkoutApi.get("/GetAllExercisesLastSessionHistory",verifyToken,GetAllExercisesLastSessionHistory)
 WorkoutApi.put("/UpdateRoutin/:id",verifyToken,Updateworkoutroutin)
 WorkoutApi.put("/updateUserActiveWorkoutPlan",verifyToken,updateUserActiveWorkoutPlan)
 WorkoutApi.post("/addworkoutsession",verifyToken,AddWorkoutSession);
