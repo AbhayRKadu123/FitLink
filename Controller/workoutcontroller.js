@@ -1,8 +1,70 @@
 import { UserModel } from "../modal/users.js"
 import express from "express";
 import { WorkoutRoutine } from "../modal/WorkoutRoutin.js";
+import { selectedRoutineDays } from "../modal/WorkoutRoutineDays.js";
 import Session from "../modal/SessionSchema.js";
 import mongoose from "mongoose";
+let storedselectedRoutineDays=async (req,res)=>{
+  try{
+    let User = await UserModel.findById(req?.user?.id);
+       let StoredDaysArray=await selectedRoutineDays.findOne({username:User?.username})
+// result?.daysArr
+       res.status(200).json({StoredDaysArray:StoredDaysArray?.daysArr})
+   
+
+
+  }catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Error Getting workout", error });
+  }
+
+}
+const dayIndex = {
+  mon: 0,
+  tue: 1,
+  wed: 2,
+  thur: 3,
+  fri: 4,
+  sat: 5,
+  sun: 6
+};
+function arrangeDays(days) {
+
+  return days
+    .filter(day => dayIndex[day] !== undefined)
+    .sort((a, b) => dayIndex[a] - dayIndex[b]);
+}
+let AddselectedRoutineDays = async (req, res) => {
+
+  try {
+       let User = await UserModel.findById(req?.user?.id);
+       let isDaysExists=await selectedRoutineDays.findOne({username:User?.username})
+       if(isDaysExists){
+        res.status(401).json({message:'Days aready exists'})
+       }
+        let arr = req.body;
+    arr = arrangeDays(arr);
+
+       let Obj={
+         userId: User?._id,
+              username:User?.username,
+          daysArr: arr,
+          
+       }
+       const DaysArr=new selectedRoutineDays(Obj)
+       let result=await DaysArr.save();
+
+   
+
+    console.log("Arr", result)
+    res.status(200).json({ result:result?.daysArr })
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Error Getting workout", error });
+  }
+
+
+}
 
 let UserDetails = async (req, res) => {
 
@@ -373,20 +435,20 @@ const GetUserProgress = async (req, res) => {
 
     if (Progress) {
       let NoOfExercise = Progress?.exercises?.length;
-    let Progresscount = 0;
+      let Progresscount = 0;
 
-for (let i = 0; i < NoOfExercise; i++) {
-  const sets = Progress?.exercises[i]?.sets;
-  if (!sets || sets.length === 0) continue;
+      for (let i = 0; i < NoOfExercise; i++) {
+        const sets = Progress?.exercises[i]?.sets;
+        if (!sets || sets.length === 0) continue;
 
-  const completedSets = sets.filter(
-    set => set?.reps > 0 && set?.weight > 0 &&set?.isSetCompleted
-  ).length;
+        const completedSets = sets.filter(
+          set => set?.reps > 0 && set?.weight > 0 && set?.isSetCompleted
+        ).length;
 
-  const exerciseProgress = (completedSets / sets.length) * (100 / NoOfExercise);
+        const exerciseProgress = (completedSets / sets.length) * (100 / NoOfExercise);
 
-  Progresscount += exerciseProgress;
-}
+        Progresscount += exerciseProgress;
+      }
 
 
       console.log('Progress', Progresscount)
@@ -468,14 +530,14 @@ const GetAllExercisesLastSessionHistory = async (req, res) => {
     if (!SessionTitle || !Day) {
       return null
     }
-      const today = getFormattedToday();
+    const today = getFormattedToday();
     let User = await UserModel.findById(req?.user?.id)
     let result = await Session.findOne({
-  day: Day,
-  date: { $lt: today } // strictly before today
-}).sort({ date: -1 });
+      day: Day,
+      date: { $lt: today } // strictly before today
+    }).sort({ date: -1 });
 
-res.status(200).json({result:result})
+    res.status(200).json({ result: result })
 
 
 
@@ -649,4 +711,4 @@ const UpdateUserWorkoutHistory = async (req, res) => {
 // }
 
 
-export {GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export {storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }

@@ -1,5 +1,5 @@
 import express from "express"
-import {GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
+import {storedselectedRoutineDays,AddselectedRoutineDays,GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
 
 
  } from "../Controller/workoutcontroller.js";
@@ -8,6 +8,8 @@ import {GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessio
 const WorkoutApi = express.Router(); // ✅ create router instance
 
 WorkoutApi.get("/getUserExercise",verifyToken,UserDetails)
+WorkoutApi.get("/storedselectedRoutineDays",verifyToken,storedselectedRoutineDays)
+WorkoutApi.post("/AddselectedRoutineDays",verifyToken,AddselectedRoutineDays)
 // app.post("/Workout/CustomWorkout",
 WorkoutApi.post("/CustomWorkout",verifyToken,addcustomworkout)
 // "/Workout/DeleteRoutin"
