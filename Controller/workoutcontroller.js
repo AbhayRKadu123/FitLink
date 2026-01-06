@@ -4,6 +4,7 @@ import { WorkoutRoutine } from "../modal/WorkoutRoutin.js";
 import { selectedRoutineDays } from "../modal/WorkoutRoutineDays.js";
 import Session from "../modal/SessionSchema.js";
 import mongoose from "mongoose";
+import ProgressPhotoModal from "../modal/ProgressPhotoModal.js";
 let storedselectedRoutineDays = async (req, res) => {
   try {
     let User = await UserModel.findById(req?.user?.id);
@@ -50,9 +51,9 @@ let GetSelectedRoutineDays = async (req, res) => {
 }
 let UpdateSelectedRoutinedays = async (req, res) => {
   try {
-    
+
     let { DaysArray } = req.body;
-    console.log("DaysArray",DaysArray)
+    console.log("DaysArray", DaysArray)
     let User = await UserModel.findById(req?.user?.id);
     let Day = await selectedRoutineDays.findOneAndUpdate({ username: User?.username }, {
       $set: {
@@ -458,58 +459,58 @@ const GetWorkoutBarChartDetail = async (req, res) => {
     return res.status(400).json({ error: true, message: err.message || "Something went wrong" });
   }
 };
-const UpdateCustomWorkoutPlan=async (req,res)=>{
-  try{
-    const {Id}=req?.query;
-  const result = await WorkoutRoutine.findById(Id);
-if (!result) {
-  return res.status(404).json({ message: "Routine not found" });
-}
+const UpdateCustomWorkoutPlan = async (req, res) => {
+  try {
+    const { Id } = req?.query;
+    const result = await WorkoutRoutine.findById(Id);
+    if (!result) {
+      return res.status(404).json({ message: "Routine not found" });
+    }
 
-const days = ["mon", "tue", "wed", "thur", "fri", "sat", "sun"];
+    const days = ["mon", "tue", "wed", "thur", "fri", "sat", "sun"];
 
-days.forEach((day) => {
-  if (req.body[day] !== undefined) {
-    result[day] = req.body[day];
-  }
-});
+    days.forEach((day) => {
+      if (req.body[day] !== undefined) {
+        result[day] = req.body[day];
+      }
+    });
 
-await result.save();
+    await result.save();
 
-return res.status(200).json({ message: "Routine updated successfully", result });
+    return res.status(200).json({ message: "Routine updated successfully", result });
 
 
     // await Result.save()
 
 
 
-  }catch(err){
+  } catch (err) {
     return res.status(400).json({ error: true, message: err.message || "Something went wrong" });
 
 
   }
 }
-const DeleteWorkoutRoutineExerise=async (req,res)=>{
-  console.log("DeleteWorkoutRoutineExerise",req?.body)
- let { Day, id } = req.body;
+const DeleteWorkoutRoutineExerise = async (req, res) => {
+  console.log("DeleteWorkoutRoutineExerise", req?.body)
+  let { Day, id } = req.body;
 
-const result = await WorkoutRoutine.findById(id);
-if (!result) {
-  return res.status(404).json({ message: "Routine not found" });
-}
+  const result = await WorkoutRoutine.findById(id);
+  if (!result) {
+    return res.status(404).json({ message: "Routine not found" });
+  }
 
-if (!result[Day]) {
-  return res.status(400).json({ message: "Invalid day provided" });
-}
+  if (!result[Day]) {
+    return res.status(400).json({ message: "Invalid day provided" });
+  }
 
-result[Day].Title = "";
-result[Day].exercises = [];
+  result[Day].Title = "";
+  result[Day].exercises = [];
 
-await result.save();
+  await result.save();
 
 
 
-  res.status(200).json({message:'routine deleted'})
+  res.status(200).json({ message: 'routine deleted' })
 }
 const GetUserProgress = async (req, res) => {
 
@@ -712,6 +713,64 @@ const UpdateUserWorkoutHistory = async (req, res) => {
 
   // console.log(req.body)
 }
+const GetAllProgressPhoto=async (req,res)=>{
+  console.log("GetAllProgressPhoto")
+
+  try{
+    const userId = new mongoose.Types.ObjectId(req.user.id)
+    let result=await ProgressPhotoModal.aggregate([{$match:{user:userId}},
+      {
+    $group: {
+      _id: "$TodaysDate",
+      Photos: { $push: "$$ROOT" }
+    }
+  }
+
+
+    ])
+    console.log("result=",result)
+    res.status(200).json({data:result})
+
+
+  }catch(err){
+       res.status(500).json({ message: 'Server Side error',error:err })
+
+  }
+}
+const AddProgressPhoto = async (req, res) => {
+  console.log("ProgressPhotoSchema", req?.body)
+  try {
+    let { ImageUrl } = req?.body;
+    let Data={
+      user: req?.user?.id,
+          
+              imageUrl: ImageUrl,
+             TodaysDate:getFormattedToday(),
+        
+
+    }
+    let IsPhotoExists=await ProgressPhotoModal.find({user:req?.user?.id,TodaysDate:getFormattedToday()})
+    console.log("IsPhotoExists",IsPhotoExists)
+    if(IsPhotoExists.length>=3){
+      return res.status(400).json({message:'Add Progress Photo Limit reached'})
+    }
+    let Result= new ProgressPhotoModal(Data)
+    Result=await Result.save();
+
+
+
+    res.status(200).json({ message: 'Upload succesfull',Result:Result })
+
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ message: 'Server Side error',error:err })
+
+
+  }
+
+
+  // ProgressPhotoSchema
+}
 
 // const GetWorkoutBarChartDetail = async (req, res) => {
 //   try {
@@ -798,4 +857,4 @@ const UpdateUserWorkoutHistory = async (req, res) => {
 // }
 
 
-export {DeleteWorkoutRoutineExerise,UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export {GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }

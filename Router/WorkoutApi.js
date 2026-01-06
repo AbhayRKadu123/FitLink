@@ -1,5 +1,5 @@
 import express from "express"
-import {DeleteWorkoutRoutineExerise,UpdateCustomWorkoutPlan,UpdateSelectedRoutinedays,GetSelectedRoutineDays,storedselectedRoutineDays,AddselectedRoutineDays,GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
+import {GetAllProgressPhoto,AddProgressPhoto,DeleteWorkoutRoutineExerise,UpdateCustomWorkoutPlan,UpdateSelectedRoutinedays,GetSelectedRoutineDays,storedselectedRoutineDays,AddselectedRoutineDays,GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
 
 
  } from "../Controller/workoutcontroller.js";
@@ -10,11 +10,17 @@ const WorkoutApi = express.Router(); // ✅ create router instance
 WorkoutApi.get("/GetSelectedRoutineDays",verifyToken,GetSelectedRoutineDays)
 WorkoutApi.put("/UpdateSelectedRoutinedays",verifyToken,UpdateSelectedRoutinedays);
 WorkoutApi.put("/UpdateCustomWorkoutPlan",UpdateCustomWorkoutPlan)
+// GetAllProgressPhoto
+WorkoutApi.get("/GetAllProgressPhoto",verifyToken,GetAllProgressPhoto)
+
+
 WorkoutApi.put("/DeleteWorkoutRoutineExerise",verifyToken,DeleteWorkoutRoutineExerise)
 
 WorkoutApi.get("/getUserExercise",verifyToken,UserDetails)
 WorkoutApi.get("/storedselectedRoutineDays",verifyToken,storedselectedRoutineDays)
 WorkoutApi.post("/AddselectedRoutineDays",verifyToken,AddselectedRoutineDays)
+WorkoutApi.post("/AddProgressPhoto",verifyToken,AddProgressPhoto)
+
 // app.post("/Workout/CustomWorkout",
 WorkoutApi.post("/CustomWorkout",verifyToken,addcustomworkout)
 // "/Workout/DeleteRoutin"
