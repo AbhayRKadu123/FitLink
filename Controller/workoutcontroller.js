@@ -5,6 +5,7 @@ import { selectedRoutineDays } from "../modal/WorkoutRoutineDays.js";
 import Session from "../modal/SessionSchema.js";
 import mongoose from "mongoose";
 import ProgressPhotoModal from "../modal/ProgressPhotoModal.js";
+import e from "express";
 let storedselectedRoutineDays = async (req, res) => {
   try {
     let User = await UserModel.findById(req?.user?.id);
@@ -276,13 +277,19 @@ const UpdateWorkoutSession = async (req, res) => {
 const GetDailySession = async (req, res) => {
   try {
     console.log('req.query=', req?.query)
+    let {id}=req?.user;
+    let Usersexist=await UserModel.findOne({_id:id})
+    if(!Usersexist){
+      return res.status(401).json({message:'User Not Found'})
+    }
     let { plantype, Date, Title } = req?.query
-    let result = await Session.findOne({ planType: plantype, date: Date, Title: Title })
+    let result = await Session.findOne({username:Usersexist?.username,planType: plantype, date: Date, Title: Title })
     console.log('result', result)
     res.status(200).json({ getworkoutsession: result })
 
 
   } catch (err) {
+    console.log('err=',err)
     res.status(400).json({ message: "Error getting workout", err });
 
 

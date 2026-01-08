@@ -2,6 +2,24 @@ import { UserModel } from "../modal/users.js";
 import mongoose from "mongoose";
 import { AllNotification } from "../modal/NotificationSchema.js";
 import { MessageStorage } from "../modal/MessageSchema.js";
+const getUserDetailLogin=async (req,res)=>{
+
+    try{
+         let id = new mongoose.Types.ObjectId(req?.query?.Id);
+             let matchstages = []
+             matchstages.push({ $match: { _id: id } })
+
+         let UserDetail = await UserModel.aggregate(matchstages)
+              res.status(200).json({ Detail: UserDetail })
+
+
+
+    }catch(err){
+
+    }
+
+
+}
 const getUserDetails = async (req, res) => {
     try {
         let id
@@ -295,8 +313,17 @@ const HandleDeleteMessage = async (req, res) => {
     }
 
 }
+const UpdatePassword=(req,res)=>{
+try{
+console.log("UpdatePassword")
+
+}catch(err){
+
+
+}
+}
 const UploadImage = (req, res) => {
     console.log('upload image')
     res.json({ UploadImage:  req.file.path })
 }
-export { UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
+export {getUserDetailLogin,UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
