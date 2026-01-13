@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const UserSchema = new mongoose.Schema({
   username: { 
@@ -66,6 +67,12 @@ const UserSchema = new mongoose.Schema({
     type:Boolean,
     default:false
 
+  },
+  Otp:{
+    type:String
+  },
+  otpExpiry: {
+    type:Date
   }
 
 });

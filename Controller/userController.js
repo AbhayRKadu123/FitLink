@@ -2,19 +2,22 @@ import { UserModel } from "../modal/users.js";
 import mongoose from "mongoose";
 import { AllNotification } from "../modal/NotificationSchema.js";
 import { MessageStorage } from "../modal/MessageSchema.js";
-const getUserDetailLogin=async (req,res)=>{
+import { sendEmail } from "../utils/sendEmail.js"
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+const getUserDetailLogin = async (req, res) => {
 
-    try{
-         let id = new mongoose.Types.ObjectId(req?.query?.Id);
-             let matchstages = []
-             matchstages.push({ $match: { _id: id } })
+    try {
+        let id = new mongoose.Types.ObjectId(req?.query?.Id);
+        let matchstages = []
+        matchstages.push({ $match: { _id: id } })
 
-         let UserDetail = await UserModel.aggregate(matchstages)
-              res.status(200).json({ Detail: UserDetail })
+        let UserDetail = await UserModel.aggregate(matchstages)
+        res.status(200).json({ Detail: UserDetail })
 
 
 
-    }catch(err){
+    } catch (err) {
 
     }
 
@@ -59,7 +62,7 @@ const getUserDetails = async (req, res) => {
                             { $ifNull: ["$FriendRequest", []] }
                         ]
                     },
-                    isPremium:1
+                    isPremium: 1
 
                 }
             });
@@ -279,10 +282,10 @@ const GetAllUserConversation = async (req, res) => {
                     isDeleted: 1,
                     replyTo: 1,
                     replyMessage: 1,
-                    RepliedToImage:1,
-                    ImageUrl:1,
-                    UniqueMessageId:1,
-                    RepliedToUniqueMessageId:1
+                    RepliedToImage: 1,
+                    ImageUrl: 1,
+                    UniqueMessageId: 1,
+                    RepliedToUniqueMessageId: 1
 
 
                 }
@@ -313,17 +316,99 @@ const HandleDeleteMessage = async (req, res) => {
     }
 
 }
-const UpdatePassword=(req,res)=>{
-try{
-console.log("UpdatePassword")
+const UpdatePassword = async (req, res) => {
+    try {
+        console.log("UpdatePassword", generateOTP())
+        let { username, email } = req?.body;
+        let UserExists = await UserModel.findOne({ username: username.trim(), email: email.trim() });
+        if (!UserExists) {
 
-}catch(err){
+            res.status(401).json({ message: 'Enter Valid Username and email!' })
 
+        }
+        let Otp = generateOTP();
+        // let Date=new Date(Date.now() + 5 * 60 * 1000);
+        UserExists.Otp = Otp;
+        UserExists.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+        await UserExists.save()
+        await sendEmail(email, "Reset Password Otp", `<h4>Otp : ${Otp}</h4>`)
+
+
+
+        res.status(200).json({ message: "Otp Sent to your registered email" })
+
+
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: 'Server side error' })
+
+
+    }
+}
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+const VerifyOtp = async (req, res) => {
+    console.log("req.body", req?.body)
+    try {
+        let { otp,
+            Username,
+            Email } = req?.body;
+        if (!otp || !Username || !Email) return res.status(400).json({ message: 'Something went wrong' })
+        let User = await UserModel.findOne({ username: Username })
+        if (User?.Otp == otp) {
+            return res.status(200).json({ message: 'Verified' })
+        } else {
+            return res.status(400).json({ message: "You entered wrong otp!" })
+        }
+
+    } catch (err) {
+        return res.status(500).json({ message: "Internal server error" })
+
+    }
 
 }
+const HandlePasswordChange = async (req, res) => {
+    try {
+        // HandlePasswordChange
+        console.log("req.body", req?.body)
+        let { oldpassword,
+            newpassword,
+            confirmnewpassword } = req.body;
+
+        const user = await UserModel.findOne({ _id: req?.user?.id });
+
+        if (!user) return res.status(400).json({ message: "Invalid email or password" });
+
+
+
+        if (oldpassword.trim() == "" || newpassword.trim() == "" || confirmnewpassword.trim() == "") {
+            res.status(400).json({ message: 'All fields are required' })
+        }
+        if (newpassword.trim() != confirmnewpassword.trim()) {
+            res.status(400).json({ message: 'Password does not match !' })
+
+        }
+        const validPassword = await bcrypt.compare(oldpassword, user.password);
+        if (!validPassword) {
+            return res.status(400).json({ message: "You Entered wrong password!" })
+        }
+        const hashedPassword = await bcrypt.hash(newpassword.trim(), 10);
+        user.password=hashedPassword;
+        await user.save();
+            res.status(200).json({ message: "Password changed successfully!" })
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: "server side error!" })
+    }
 }
-const UploadImage = (req, res) => {
+const UploadImage = async (req, res) => {
+
+
     console.log('upload image')
-    res.json({ UploadImage:  req.file.path })
+    res.json({ UploadImage: req.file.path })
 }
-export {getUserDetailLogin,UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
+export { HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
