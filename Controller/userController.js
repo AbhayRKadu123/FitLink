@@ -405,10 +405,76 @@ const HandlePasswordChange = async (req, res) => {
         res.status(500).json({ message: "server side error!" })
     }
 }
+const ProfileSetting=async (req,res)=>{
+    try{
+let {
+     ProfileUrl,
+  fullName,
+  age,
+  weight,
+  height,
+  Bmi,
+  Bio,
+  Goal,
+  gender
+}=req?.body;
+// UserProfileUrl:{
+//      type:String,
+//   },
+//   Weight:{
+//     type:Number
+//   },
+//   age:{
+//     type:Number
+//   },
+//   goal:{
+//      type:String,
+//   },
+//   height:{
+//     type:Number
+//   },
+let user = await UserModel.findOneAndUpdate(
+  { _id: req.user.id },
+  {
+    UserProfileUrl: ProfileUrl,
+    fullname:fullName,
+    Weight: weight,
+    age,
+    goal: Goal,
+    height,
+    Bmi,
+    Bio,
+    Gender: gender
+  },
+  { new: true }
+);
+
+
+
+
+        res.status(200).json({ message: "data updated successfully!" })
+
+    }catch(err){
+        console.log(err)
+        res.status(500).json({ message: "server side error!" })
+
+    }
+    
+}
+const ProfileSettingUserData=async(req,res)=>{
+    try{
+let id=req?.user?.id;
+let Result=await UserModel.findOne({_id:id})
+res.status(200).json({message:Result})
+    }catch(err){
+        res.status(500).json({ message: "server side error!" })
+    }
+}
+
 const UploadImage = async (req, res) => {
 
 
     console.log('upload image')
     res.json({ UploadImage: req.file.path })
 }
-export { HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
+export {ProfileSettingUserData, ProfileSetting, HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }

@@ -51,10 +51,7 @@ const UserSchema = new mongoose.Schema({
     default: []
 
   },
-  Bio:{
-    type:String,
-    default:'We Love Fitlin!'
-  },
+
   LoginCount:{
     type:Number,
     default:0
@@ -73,7 +70,41 @@ const UserSchema = new mongoose.Schema({
   },
   otpExpiry: {
     type:Date
+  },
+    Bio:{
+    type:String,
+    default:'We Love Fitlin!'
+  },
+  UserProfileUrl:{
+     type:String,
+     default:""
+  },
+  Weight:{
+    type:Number
+  },
+  age:{
+    type:Number
+  },
+  goal:{
+     type:String,
+  },
+  height:{
+    type:Number
+  },
+  Bmi:{
+    type:String,
+  },
+  Bio:{
+    type:String,
+  },
+  Gender:{
+    type:String,
+  },
+  fullname:{
+    type:String,
+
   }
+  
 
 });
 
