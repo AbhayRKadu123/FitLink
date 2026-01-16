@@ -39,11 +39,12 @@ const SignUp = async (req, res) => {
       return res.status(400).json({ message: "Registration full" });
     }
 
-    let { username, email, password, referralCode } = req.body;
-
+    let { username, email, password, referalid } = req.body;
+    console.log('req.body', req.body)
     if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
+
 
     username = username.trim();
     email = email.trim();
@@ -58,11 +59,12 @@ const SignUp = async (req, res) => {
     // 3️⃣ Handle referral
     let referrer = null;
 
-    if (referralCode) {
-      referrer = await UserModel.findOne({ YourCode: referralCode });
+    if (referalid) {
+      referrer = await UserModel.findOne({ YourCode: referalid });
       if (!referrer) {
         return res.status(400).json({ message: "Invalid referral code" });
       }
+      console.log("referrer", referrer)
     }
 
     // 4️⃣ Create user
@@ -75,8 +77,8 @@ const SignUp = async (req, res) => {
       Points: 10 // signup bonus
     });
 
-    let result=await newUser.save();
-   
+    await newUser.save();
+
 
     // 5️⃣ Referral rewards
     if (referrer) {
@@ -86,16 +88,18 @@ const SignUp = async (req, res) => {
       newUser.Points += 10;
       await newUser.save();
 
-      sendEmail(
+      await sendEmail(
         referrer.email,
         "Referral Bonus",
         "Congratulations! You received 10 points for a successful referral."
       );
+      // console.log("newUser.email", newUser.email)
+      // let RegisteredUser
 
-      sendEmail(
+      await sendEmail(
         newUser.email,
         "Referral Bonus",
-        "Congratulations! You received 10 referral bonus points."
+        "You earned referral points 🎁."
       );
     }
 
