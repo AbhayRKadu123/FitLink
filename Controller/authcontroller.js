@@ -2,6 +2,8 @@ import { UserModel } from "../modal/users.js"
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../utils/sendEmail.js";
+
 const Login = async (req, res) => {
   try {
     let { username, password } = req.body;
@@ -31,30 +33,82 @@ const Login = async (req, res) => {
   ;
 const SignUp = async (req, res) => {
   try {
-    const userlst = await UserModel.find()
-    if (userlst.length > 5) {
+    // 1️⃣ Limit total users
+    const userCount = await UserModel.countDocuments();
+    if (userCount >= 5) {
       return res.status(400).json({ message: "Registration full" });
-
     }
-    console.log('userlst', userlst)
-    let { username, email, password } = req.body;
-    console.log('signup', req.body)
-    username = username.trim()
-    email = email.trim()
-    password = password.trim()
+
+    let { username, email, password, referralCode } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    username = username.trim();
+    email = email.trim();
+    password = password.trim();
+
+    // 2️⃣ Check existing user
     const existingUser = await UserModel.findOne({ username });
-    console.log('existingUser', existingUser)
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
 
+    // 3️⃣ Handle referral
+    let referrer = null;
+
+    if (referralCode) {
+      referrer = await UserModel.findOne({ YourCode: referralCode });
+      if (!referrer) {
+        return res.status(400).json({ message: "Invalid referral code" });
+      }
+    }
+
+    // 4️⃣ Create user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new UserModel({ username, email, password: hashedPassword });
-    await newUser.save();
 
-    res.status(201).json({ message: "User created successfully" });
+    const newUser = new UserModel({
+      username,
+      email,
+      password: hashedPassword,
+      Points: 10 // signup bonus
+    });
+
+    let result=await newUser.save();
+   
+
+    // 5️⃣ Referral rewards
+    if (referrer) {
+      referrer.Points = (referrer.Points || 0) + 10;
+      await referrer.save();
+
+      newUser.Points += 10;
+      await newUser.save();
+
+      sendEmail(
+        referrer.email,
+        "Referral Bonus",
+        "Congratulations! You received 10 points for a successful referral."
+      );
+
+      sendEmail(
+        newUser.email,
+        "Referral Bonus",
+        "Congratulations! You received 10 referral bonus points."
+      );
+    }
+
+    return res.status(201).json({
+      message: "User created successfully",
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Signup Error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
-}
+};
+
 const UpdateOldPassword = async (req, res) => {
   try {
     console.log("value=", req.body)

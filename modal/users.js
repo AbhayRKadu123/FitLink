@@ -103,6 +103,14 @@ const UserSchema = new mongoose.Schema({
   fullname:{
     type:String,
 
+  },
+   YourCode:{
+    type:String,
+
+  },
+  Points:{
+     type:Number,
+     default:0
   }
   
 

@@ -396,78 +396,112 @@ const HandlePasswordChange = async (req, res) => {
             return res.status(400).json({ message: "You Entered wrong password!" })
         }
         const hashedPassword = await bcrypt.hash(newpassword.trim(), 10);
-        user.password=hashedPassword;
+        user.password = hashedPassword;
         await user.save();
-            res.status(200).json({ message: "Password changed successfully!" })
+        res.status(200).json({ message: "Password changed successfully!" })
 
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "server side error!" })
     }
 }
-const ProfileSetting=async (req,res)=>{
-    try{
-let {
-     ProfileUrl,
-  fullName,
-  age,
-  weight,
-  height,
-  Bmi,
-  Bio,
-  Goal,
-  gender
-}=req?.body;
-// UserProfileUrl:{
-//      type:String,
-//   },
-//   Weight:{
-//     type:Number
-//   },
-//   age:{
-//     type:Number
-//   },
-//   goal:{
-//      type:String,
-//   },
-//   height:{
-//     type:Number
-//   },
-let user = await UserModel.findOneAndUpdate(
-  { _id: req.user.id },
-  {
-    UserProfileUrl: ProfileUrl,
-    fullname:fullName,
-    Weight: weight,
-    age,
-    goal: Goal,
-    height,
-    Bmi,
-    Bio,
-    Gender: gender
-  },
-  { new: true }
-);
+const ProfileSetting = async (req, res) => {
+    try {
+        let {
+            ProfileUrl,
+            fullName,
+            age,
+            weight,
+            height,
+            Bmi,
+            Bio,
+            Goal,
+            gender
+        } = req?.body;
+        // UserProfileUrl:{
+        //      type:String,
+        //   },
+        //   Weight:{
+        //     type:Number
+        //   },
+        //   age:{
+        //     type:Number
+        //   },
+        //   goal:{
+        //      type:String,
+        //   },
+        //   height:{
+        //     type:Number
+        //   },
+        let user = await UserModel.findOneAndUpdate(
+            { _id: req.user.id },
+            {
+                UserProfileUrl: ProfileUrl,
+                fullname: fullName,
+                Weight: weight,
+                age,
+                goal: Goal,
+                height,
+                Bmi,
+                Bio,
+                Gender: gender
+            },
+            { new: true }
+        );
 
 
 
 
         res.status(200).json({ message: "data updated successfully!" })
 
-    }catch(err){
+    } catch (err) {
         console.log(err)
         res.status(500).json({ message: "server side error!" })
 
     }
-    
+
 }
-const ProfileSettingUserData=async(req,res)=>{
-    try{
-let id=req?.user?.id;
-let Result=await UserModel.findOne({_id:id})
-res.status(200).json({message:Result})
-    }catch(err){
+const ProfileSettingUserData = async (req, res) => {
+    try {
+        let id = req?.user?.id;
+        let Result = await UserModel.findOne({ _id: id })
+        res.status(200).json({ message: Result })
+    } catch (err) {
         res.status(500).json({ message: "server side error!" })
+    }
+}
+const GenerateCouponCode = async (req, res) => {
+    try {
+        let id = req?.user?.id;
+        let UserDetail = await UserModel.findOne({ _id: id })
+        console.log(UserDetail?.username)
+        if (!UserDetail?.YourCode || UserDetail?.YourCode.trim() == "") {
+            let User = await UserModel.findOneAndUpdate({ _id: id }, {
+                YourCode: UserDetail?.username
+            })
+        }
+
+        res.status(200).json({ message: 'code generated' })
+
+
+    } catch (err) {
+        res.status(500).json({ message: "server side error!", Err: err })
+
+
+    }
+}
+const GetReferalCode = async (req, res) => {
+    try {
+        let id = req?.user?.id;
+        id = new mongoose.Types.ObjectId(id);
+        let CouponCode = await UserModel.aggregate([{ $match: { _id: id } }, { $project: { _id: 0, YourCode: 1 } }]);
+        console.log("CouponCode", CouponCode)
+        res.status(200).json({ code: CouponCode })
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: "server side error!", Err: err })
+
     }
 }
 
@@ -477,4 +511,4 @@ const UploadImage = async (req, res) => {
     console.log('upload image')
     res.json({ UploadImage: req.file.path })
 }
-export {ProfileSettingUserData, ProfileSetting, HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
+export { GenerateCouponCode, GetReferalCode, ProfileSettingUserData, ProfileSetting, HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }

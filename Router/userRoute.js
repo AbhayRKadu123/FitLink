@@ -1,11 +1,15 @@
 import express from 'express'
-import {ProfileSettingUserData, ProfileSetting,HandlePasswordChange,VerifyOtp,UpdatePassword,getUserDetailLogin,UploadImage,UserNotification,HandleDeleteMessage,GetReplyMessage, getUserDetails,GetUserFeed,AddFriendUser,GetAllFriendRequest,GetAllUserConversation} from '../Controller/userController.js';
+import {GenerateCouponCode,GetReferalCode,ProfileSettingUserData, ProfileSetting,HandlePasswordChange,VerifyOtp,UpdatePassword,getUserDetailLogin,UploadImage,UserNotification,HandleDeleteMessage,GetReplyMessage, getUserDetails,GetUserFeed,AddFriendUser,GetAllFriendRequest,GetAllUserConversation} from '../Controller/userController.js';
 import { verifyToken } from "../MiddleWare/VerifyToken.js";
 import parser from '../MiddleWare/UploadPhoto.js';
 const UserApi = express.Router(); // ✅ create router instance
 // getUserDetails
 UserApi.get("/getUserDetailLogin",getUserDetailLogin)
 UserApi.get("/getUserDetail",verifyToken,getUserDetails)
+UserApi.get("/GetReferalCode",verifyToken,GetReferalCode)
+UserApi.put("/GenerateCouponCode",verifyToken,GenerateCouponCode)
+
+// GenerateCouponCode
 UserApi.post("/HandlePasswordChange",verifyToken,HandlePasswordChange);
 
 UserApi.get("/GetReplyMessage",GetReplyMessage)
