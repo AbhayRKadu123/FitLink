@@ -47,6 +47,7 @@ const getUserDetails = async (req, res) => {
                     ActiveWorkoutPlan: 1,
                     WorkoutHistory: 1,
                     LoginCount: 1,
+                    Points:1,
                     friendsCount: {
                         $size: { $ifNull: ["$Friends", []] }
                     },
@@ -504,6 +505,41 @@ const GetReferalCode = async (req, res) => {
 
     }
 }
+const SendQuery=async(req,res)=>{
+    try{
+console.log("SendQuery",req?.body)
+let {Data}=req?.body;
+let User=await UserModel.findOne({_id:req?.user?.id});
+// fitlink84@gmail.com
+await sendEmail(
+  "fitlink84@gmail.com",
+  "New User Query Received",
+  `
+A new query has been submitted by a user.
+
+Name: ${User?.username || "N/A"}
+Email: ${User?.email || "N/A"}
+Subject: ${'Support Request '|| "N/A"}
+
+Message:
+${ Data}
+  `
+);
+
+await sendEmail(
+  User?.email,
+  "Support Request Received",
+  "This is to confirm that we have received your query. Our support team is currently reviewing it and will respond at the earliest."
+);
+
+        res.status(200).json({ message: "Query Submited" })
+
+    }catch(err){
+        console.log(err)
+        res.status(500).json({ message: "server side error!", Err: err })
+
+    }
+}
 
 const UploadImage = async (req, res) => {
 
@@ -511,4 +547,4 @@ const UploadImage = async (req, res) => {
     console.log('upload image')
     res.json({ UploadImage: req.file.path })
 }
-export { GenerateCouponCode, GetReferalCode, ProfileSettingUserData, ProfileSetting, HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
+export {SendQuery, GenerateCouponCode, GetReferalCode, ProfileSettingUserData, ProfileSetting, HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }

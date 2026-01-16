@@ -1,5 +1,5 @@
 import express from 'express'
-import {GenerateCouponCode,GetReferalCode,ProfileSettingUserData, ProfileSetting,HandlePasswordChange,VerifyOtp,UpdatePassword,getUserDetailLogin,UploadImage,UserNotification,HandleDeleteMessage,GetReplyMessage, getUserDetails,GetUserFeed,AddFriendUser,GetAllFriendRequest,GetAllUserConversation} from '../Controller/userController.js';
+import {SendQuery,GenerateCouponCode,GetReferalCode,ProfileSettingUserData, ProfileSetting,HandlePasswordChange,VerifyOtp,UpdatePassword,getUserDetailLogin,UploadImage,UserNotification,HandleDeleteMessage,GetReplyMessage, getUserDetails,GetUserFeed,AddFriendUser,GetAllFriendRequest,GetAllUserConversation} from '../Controller/userController.js';
 import { verifyToken } from "../MiddleWare/VerifyToken.js";
 import parser from '../MiddleWare/UploadPhoto.js';
 const UserApi = express.Router(); // ✅ create router instance
@@ -25,6 +25,7 @@ UserApi.get("/GetAllUserConversation",verifyToken,GetAllUserConversation)
 UserApi.delete("/HandleDeleteMessage",verifyToken,HandleDeleteMessage)
 UserApi.post("/UploadImage",verifyToken,parser.single('file'),UploadImage)
 UserApi.post("/VerifyOtp",VerifyOtp)
+UserApi.post("/SendQuery",verifyToken,SendQuery)
 UserApi.put("/UpdatePassword",UpdatePassword)
 
 export default UserApi;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
