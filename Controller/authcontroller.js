@@ -29,8 +29,7 @@ const Login = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
-  ;
+};
 const SignUp = async (req, res) => {
   try {
     // 1️⃣ Limit total users
@@ -74,7 +73,8 @@ const SignUp = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      Points: 10 // signup bonus
+      Points: 10, // signup bonus,
+      YourCode:username
     });
 
     await newUser.save();
