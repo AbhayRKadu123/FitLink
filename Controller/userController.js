@@ -5,6 +5,8 @@ import { MessageStorage } from "../modal/MessageSchema.js";
 import { sendEmail } from "../utils/sendEmail.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Transictions } from "../modal/UserPaymetMethods.js";
+import { AllPointHistorys } from "../modal/AllPointHistory.js";
 const getUserDetailLogin = async (req, res) => {
 
     try {
@@ -47,7 +49,7 @@ const getUserDetails = async (req, res) => {
                     ActiveWorkoutPlan: 1,
                     WorkoutHistory: 1,
                     LoginCount: 1,
-                    Points:1,
+                    Points: 1,
                     friendsCount: {
                         $size: { $ifNull: ["$Friends", []] }
                     },
@@ -505,38 +507,189 @@ const GetReferalCode = async (req, res) => {
 
     }
 }
-const SendQuery=async(req,res)=>{
-    try{
-console.log("SendQuery",req?.body)
-let {Data}=req?.body;
-let User=await UserModel.findOne({_id:req?.user?.id});
-// fitlink84@gmail.com
-await sendEmail(
-  "fitlink84@gmail.com",
-  "New User Query Received",
-  `
+const SendQuery = async (req, res) => {
+    try {
+        console.log("SendQuery", req?.body)
+        let { Data } = req?.body;
+        let User = await UserModel.findOne({ _id: req?.user?.id });
+        // fitlink84@gmail.com
+        await sendEmail(
+            "fitlink84@gmail.com",
+            "New User Query Received",
+            `
 A new query has been submitted by a user.
 
 Name: ${User?.username || "N/A"}
 Email: ${User?.email || "N/A"}
-Subject: ${'Support Request '|| "N/A"}
+Subject: ${'Support Request ' || "N/A"}
 
 Message:
-${ Data}
+${Data}
   `
-);
+        );
 
-await sendEmail(
-  User?.email,
-  "Support Request Received",
-  "This is to confirm that we have received your query. Our support team is currently reviewing it and will respond at the earliest."
-);
+        await sendEmail(
+            User?.email,
+            "Support Request Received",
+            "This is to confirm that we have received your query. Our support team is currently reviewing it and will respond at the earliest."
+        );
 
         res.status(200).json({ message: "Query Submited" })
 
-    }catch(err){
+    } catch (err) {
         console.log(err)
         res.status(500).json({ message: "server side error!", Err: err })
+
+    }
+}
+
+const HandleGetPaymentMethods = async (req, res) => {
+    try {
+        console.log(' HandleGetPaymentMethods', req?.query)
+        let id = req.user.id;
+        let UserDetail = await UserModel.findOne({ _id: id })
+        if (!UserDetail) {
+            return res.status(400).json({ message: "User does not exists !" })
+        }
+        const { PayMentOption } = req?.query;
+        let PaymentMethodDetails = await Transictions.findOne({ username: UserDetail?.username, paymentMethod: PayMentOption })
+        if (!PaymentMethodDetails) {
+            return res.status(400).json({ message: "PaymentMethod does not exists !" })
+
+        }
+        return res.status(200).json({ message: "Payment Details", Data: PaymentMethodDetails })
+
+    } catch (err) {
+        return res.status(500).json({ message: "server side error!", Err: err })
+
+
+    }
+}
+
+const HandleAddPaymentMethod = async (req, res) => {
+    console.log(req.body)
+    try {
+        // TransictionsTransictions
+        let { paymentoption, Id, number } = req.body;
+        let id = req.user.id;
+        const User = await UserModel.findOne({ _id: id })
+        console.log("User", User)
+        console.log("paymentoption", paymentoption)
+
+        // paymentoption
+
+        if (!paymentoption || Id.trim() == "" || number.trim() == "") {
+            return res.status(400).json({ message: "Some fields are missing" })
+
+        }
+        let PaymentDetailExists = await Transictions.findOne({ username: User?.username, paymentMethod: paymentoption })
+        console.log("PaymentDetailExists", PaymentDetailExists)
+        if (PaymentDetailExists) {
+            return res.status(400).json({ message: "Payment detail already exists!" })
+
+        }
+        let Data = new Transictions({
+            paymentMethod: paymentoption,
+            username: User?.username,
+            Id: Id.trim(),
+            number: number
+
+        })
+        await Data.save();
+
+
+
+        return res.status(200).json({ message: 'Payment method added successfully!' })
+
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).json({ message: "server side error!", Err: err })
+
+    }
+}
+const HandleDeletePaymentMethod = async (req, res) => {
+    try {
+        const { Id } = req?.body;
+        if (!Id) {
+            return res.status(500).json({ message: "Payment Method does not exists!" })
+        }
+        await Transictions.findOneAndDelete({ _id: Id })
+        res.status(200).json({ message: "Payment Method deleted successfully!" })
+
+    } catch (err) {
+        res.status(500).json({ message: "Server side error!" })
+
+    }
+}
+const HandleUpdatePaymentMethod = async (req, res) => {
+    try {
+        const {
+            PaymentMethodId,
+            paymentoption,
+            Id,
+            number
+        } = req?.body;
+        let Result = await Transictions.findOne({ _id: PaymentMethodId })
+        Result.paymentoption = paymentoption;
+        Result.Id = Id;
+        Result.number = number;
+        await Result.save();
+
+        res.status(200).json({ message: "Update successfull !" })
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: "Server side error!" })
+
+    }
+    console.log("HandleUpdatePaymentMethod", req?.body)
+
+}
+const GetAllPointHistoryOptions = async (req, res) => {
+    try {
+        console.log("label: WorkoutComplete, value", req?.query)
+        let User = await UserModel.findOne({ _id: req?.user?.id })
+        if (!User) {
+            return res.status(400).json({ message: "User does not exists!" })
+
+        }
+        let Data = await AllPointHistorys.aggregate([{ $match: { username: User.username } },{$group:{_id:null,Types:{$addToSet:"$PointsType"}}}, {
+            $project: {
+                _id:0,
+               Types:1
+
+            }
+        }])
+        console.log('Data', Data)
+        res.status(200).json({ Options: Data })
+
+    } catch (err) {
+        res.status(500).json({ message: "Server side error!" })
+    }
+}
+const GetAllPointHistoryData=async (req,res)=>{
+    try{
+        console.log('req.query',req.query)
+        const {Option}=req?.query;
+         let User = await UserModel.findOne({ _id: req?.user?.id })
+        if(Option.trim()==""||!Option){
+            return res.status(400).json({message:"Option not selected!"})
+        }
+        let Pipeline=[];
+        if(Option=="all"){
+            Pipeline.push({$match:{username:User?.username}})
+        }else{
+            Pipeline.push({$match:{username:User?.username,PointsType:Option}})
+
+        }
+        let Data= await AllPointHistorys.aggregate(Pipeline)
+        console.log("Data",Data)
+
+        res.status(200).json({Data:Data})
+
+    }catch(err){
+        res.status(500).json({ message: "Server side error!" })
 
     }
 }
@@ -547,4 +700,4 @@ const UploadImage = async (req, res) => {
     console.log('upload image')
     res.json({ UploadImage: req.file.path })
 }
-export {SendQuery, GenerateCouponCode, GetReferalCode, ProfileSettingUserData, ProfileSetting, HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }
+export {GetAllPointHistoryData, GetAllPointHistoryOptions, HandleDeletePaymentMethod, HandleUpdatePaymentMethod, HandleGetPaymentMethods, HandleAddPaymentMethod, SendQuery, GenerateCouponCode, GetReferalCode, ProfileSettingUserData, ProfileSetting, HandlePasswordChange, VerifyOtp, getUserDetailLogin, UpdatePassword, UploadImage, GetReplyMessage, HandleDeleteMessage, UserNotification, getUserDetails, GetUserFeed, AddFriendUser, GetAllFriendRequest, GetAllUserConversation }

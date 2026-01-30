@@ -3,6 +3,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/sendEmail.js";
+import { AllPointHistorys } from "../modal/AllPointHistory.js";
 
 const Login = async (req, res) => {
   try {
@@ -30,6 +31,15 @@ const Login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+function getFormattedToday() {
+  // const utcNow = new Date().toISOString();
+  const utcDate = new Date();
+  console.log('utcDate', utcDate)
+  const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+  console.log('isodate', istDate.toISOString()?.split('T')[0]);
+
+  return istDate.toISOString()?.split('T')[0]
+}
 const SignUp = async (req, res) => {
   try {
     // 1️⃣ Limit total users
@@ -74,7 +84,7 @@ const SignUp = async (req, res) => {
       email,
       password: hashedPassword,
       Points: 10, // signup bonus,
-      YourCode:username
+      YourCode: username
     });
 
     await newUser.save();
@@ -82,12 +92,26 @@ const SignUp = async (req, res) => {
 
     // 5️⃣ Referral rewards
     if (referrer) {
-      referrer.Points = (referrer.Points || 0) + 10;
-      await referrer.save();
-
-      newUser.Points += 10;
-      await newUser.save();
-
+      // referrer.Points = (referrer.Points || 0) + 10;
+      // await referrer.save();
+      let ReferralPoint=new AllPointHistorys({
+        
+PointsType:"ReferralBonus",
+username:referrer?.username,
+points:10,
+Date:getFormattedToday()
+      })
+      await ReferralPoint.save();
+      // newUser.Points += 10;
+      // await newUser.save();
+ let ReferralPoint2=new AllPointHistorys({
+        
+PointsType:"ReferralBonus",
+username:newUser?.username,
+points:10,
+Date:getFormattedToday()
+      })
+      await ReferralPoint2.save();
       await sendEmail(
         referrer.email,
         "Referral Bonus",

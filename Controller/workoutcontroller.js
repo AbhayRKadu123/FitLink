@@ -6,6 +6,7 @@ import Session from "../modal/SessionSchema.js";
 import mongoose from "mongoose";
 import ProgressPhotoModal from "../modal/ProgressPhotoModal.js";
 import e from "express";
+import { AllPointHistorys } from "../modal/AllPointHistory.js";
 let storedselectedRoutineDays = async (req, res) => {
   try {
     let User = await UserModel.findById(req?.user?.id);
@@ -546,10 +547,25 @@ const GetUserProgress = async (req, res) => {
 
 
       console.log('Progress', Progresscount)
-      if (Progresscount == 100) {
+      let IsPointAllocated=await AllPointHistorys.findOne({username:User?.username,Date:getFormattedToday(), PointsType:"WorkoutComplete"})
         Progress.isCompleted = true;
+     
+      if (Progresscount ==100) {
+         if(!IsPointAllocated){
+        
+      
+        // AllPointHistorys
+        let data= {
+        PointsType:"WorkoutComplete",
+        username:User?.username,
+        Date:getFormattedToday(),
+
+        points:5}
+        let NewPoint=new AllPointHistorys(data);
+       let Val= await NewPoint.save();
         await Progress.save()
-      }
+        console.log(Val)
+      }}
       res.status(200).json({ ProgressPercentage: Progresscount })
 
 
