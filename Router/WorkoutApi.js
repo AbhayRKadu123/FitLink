@@ -1,5 +1,6 @@
 import express from "express"
-import {GetAllProgressPhoto,AddProgressPhoto,DeleteWorkoutRoutineExerise,UpdateCustomWorkoutPlan,UpdateSelectedRoutinedays,GetSelectedRoutineDays,storedselectedRoutineDays,AddselectedRoutineDays,GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
+import {GetRelatedExerciseData,GetAllProgressPhoto, GetAllPointsSum
+,AddProgressPhoto,DeleteWorkoutRoutineExerise,UpdateCustomWorkoutPlan,UpdateSelectedRoutinedays,GetSelectedRoutineDays,storedselectedRoutineDays,AddselectedRoutineDays,GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
 
 
  } from "../Controller/workoutcontroller.js";
@@ -9,6 +10,9 @@ const WorkoutApi = express.Router(); // ✅ create router instance
 
 WorkoutApi.get("/GetSelectedRoutineDays",verifyToken,GetSelectedRoutineDays)
 WorkoutApi.put("/UpdateSelectedRoutinedays",verifyToken,UpdateSelectedRoutinedays);
+// GetAllPointsSum
+WorkoutApi.get("/GetAllPointsSum",verifyToken,GetAllPointsSum)
+WorkoutApi.get("/GetRelatedExerciseData",verifyToken,GetRelatedExerciseData)
 WorkoutApi.put("/UpdateCustomWorkoutPlan",UpdateCustomWorkoutPlan)
 // GetAllProgressPhoto
 WorkoutApi.get("/GetAllProgressPhoto",verifyToken,GetAllProgressPhoto)

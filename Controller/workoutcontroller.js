@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import ProgressPhotoModal from "../modal/ProgressPhotoModal.js";
 import e from "express";
 import { AllPointHistorys } from "../modal/AllPointHistory.js";
+import { Exercises } from "../modal/Exercises.js";
 let storedselectedRoutineDays = async (req, res) => {
   try {
     let User = await UserModel.findById(req?.user?.id);
@@ -214,6 +215,45 @@ function getFormattedToday() {
   console.log('isodate', istDate.toISOString()?.split('T')[0]);
 
   return istDate.toISOString()?.split('T')[0]
+}
+const GetRelatedExerciseData=async (req,res)=>{
+  try{
+  console.log("GetRelatedExerciseData",req?.query.Val)
+  let result=await Exercises.aggregate([{$match:{name:{ $regex: req?.query.Val, $options: "i"}}}]);
+  // console.log(result);
+  res.status(200).json({message:result})
+  }catch(err){
+   return res.status(500).json({ message: "Error updating workout", err });
+
+  }
+
+
+}
+const GetAllPointsSum= async (req,res)=>{
+  try{
+     let User = await UserModel.findOne({ _id: req?.user?.id })
+    let Data= await AllPointHistorys.aggregate([
+      {
+        $match:{username:User?.username}
+      },
+      {
+        $group:{
+          _id:null,
+          Total:{"$sum":"$points"}
+        }
+      },
+      {
+        $project:{
+          Total:1
+        }
+      }
+
+    ])
+    res.status(200).json({Data:Data})
+
+  }catch(err){
+
+  }
 }
 
 // getFormattedToday()
@@ -879,5 +919,4 @@ const AddProgressPhoto = async (req, res) => {
 //   }
 // }
 
-
-export {GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export {GetRelatedExerciseData,GetAllPointsSum,GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
