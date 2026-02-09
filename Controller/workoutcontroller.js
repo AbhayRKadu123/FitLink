@@ -263,10 +263,12 @@ const AddWorkoutSession = async (req, res) => {
   try {
     // let result=await SessionSchema(req?.body)
     // res.send(result)
+    console.log("req.body=",req.body?.exercises[0])
     let Id = req?.body?.Id;
     let User = await UserModel.findOne({ _id: req?.user?.id })
     // getISTDate
-    let Res = await Session.findOne({ username: User, date: getFormattedToday() })
+    let Res = await Session.findOne({ username: User?.username, date: getFormattedToday() })
+    console.log(" Res", Res)
     if (Res) {
       return res.status(409).json({ message: 'Session Already Exist' })
     }
@@ -274,7 +276,7 @@ const AddWorkoutSession = async (req, res) => {
       let resullt = await Session.findById(Id)
       if (resullt) return res.status(409).json({ message: 'Session Already Exist' })
     }
-    let session = new Session(req?.body);
+    let session = new Session({username:User.username,...req?.body});
     let result = await session.save()
     res.status(200).json({ result: result })
 
