@@ -760,6 +760,22 @@ const GetLastSessionHistory = async (req, res) => {
   }
 
 }
+const Currentexerise= async (req,res)=>{
+  try{
+console.log("CurrExerciseDetail",req.query.name)
+  let {name}=req.query;
+  if(!name){
+    return null;
+  }
+  let result=await Exercises.findOne({name:name})
+
+  return res.status(200).json({Currentexerise:result})
+  }catch(err){
+    res.status(500).json({ message: 'something went wrong' })
+
+  }
+  
+}
 const UpdateUserWorkoutHistory = async (req, res) => {
   try {
 
@@ -921,4 +937,4 @@ const AddProgressPhoto = async (req, res) => {
 //   }
 // }
 
-export {GetRelatedExerciseData,GetAllPointsSum,GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export {Currentexerise,GetRelatedExerciseData,GetAllPointsSum,GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }

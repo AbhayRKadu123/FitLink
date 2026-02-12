@@ -1,5 +1,5 @@
 import express from "express"
-import {GetRelatedExerciseData,GetAllProgressPhoto, GetAllPointsSum
+import {Currentexerise,GetRelatedExerciseData,GetAllProgressPhoto, GetAllPointsSum
 ,AddProgressPhoto,DeleteWorkoutRoutineExerise,UpdateCustomWorkoutPlan,UpdateSelectedRoutinedays,GetSelectedRoutineDays,storedselectedRoutineDays,AddselectedRoutineDays,GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
 
 
@@ -9,6 +9,7 @@ import {GetRelatedExerciseData,GetAllProgressPhoto, GetAllPointsSum
 const WorkoutApi = express.Router(); // ✅ create router instance
 
 WorkoutApi.get("/GetSelectedRoutineDays",verifyToken,GetSelectedRoutineDays)
+WorkoutApi.get("/Currentexerise",verifyToken,Currentexerise)
 WorkoutApi.put("/UpdateSelectedRoutinedays",verifyToken,UpdateSelectedRoutinedays);
 // GetAllPointsSum
 WorkoutApi.get("/GetAllPointsSum",verifyToken,GetAllPointsSum)
