@@ -219,7 +219,7 @@ function getFormattedToday() {
 const GetRelatedExerciseData=async (req,res)=>{
   try{
   console.log("GetRelatedExerciseData",req?.query.Val)
-  let result=await Exercises.aggregate([{$match:{name:{ $regex: req?.query.Val, $options: "i"}}}]);
+  let result=await Exercises.aggregate([{$match:{name:{ $regex: req?.query?.Val.trim(), $options: "i"}}}]);
   // console.log(result);
   res.status(200).json({message:result})
   }catch(err){
@@ -326,8 +326,35 @@ const GetDailySession = async (req, res) => {
       return res.status(401).json({message:'User Not Found'})
     }
     let { plantype, Date, Title } = req?.query
+    let Routine=await WorkoutRoutine.findOne({username:Usersexist?.username});
     let result = await Session.findOne({username:Usersexist?.username,planType: plantype, date: Date, Title: Title })
-    console.log('result', result)
+    // console.log("req?.query",req?.query)
+    // console.log('result', result)
+
+    
+    // console.log('Routine', Routine[result?.day]?.exercises)
+    for (let ele of Routine[result?.day]?.exercises || []) {
+  // console.log(ele);
+  let IsIncluded=false;
+  for( let Ele of result?.exercises ){
+if(Ele?.name==ele){
+  IsIncluded=true;
+}
+
+  }
+  if(!IsIncluded){
+    result?.exercises.push({
+       
+      name: ele,
+      sets: [{reps:0,weight:0}],
+     
+    
+
+    })
+
+  }
+    }
+console.log('result', result?.exercises)
     res.status(200).json({ getworkoutsession: result })
 
 
@@ -513,6 +540,9 @@ const UpdateCustomWorkoutPlan = async (req, res) => {
   try {
     const { Id } = req?.query;
     const result = await WorkoutRoutine.findById(Id);
+    // console.log(result)
+    // console.log(result[day])
+
     if (!result) {
       return res.status(404).json({ message: "Routine not found" });
     }
