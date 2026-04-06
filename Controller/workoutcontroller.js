@@ -8,6 +8,8 @@ import ProgressPhotoModal from "../modal/ProgressPhotoModal.js";
 import e from "express";
 import { AllPointHistorys } from "../modal/AllPointHistory.js";
 import { Exercises } from "../modal/Exercises.js";
+import CustomWorkoutFolders from "../modal/CustomWorkoutFolder.js";
+import req from "express/lib/request.js";
 let storedselectedRoutineDays = async (req, res) => {
   try {
     let User = await UserModel.findById(req?.user?.id);
@@ -316,6 +318,63 @@ const UpdateWorkoutSession = async (req, res) => {
 
 
 }
+
+const CustomWorkoutAddFolder=async (req,res)=>{
+  try{
+console.log("CustomWorkoutAddFolder",req.body)
+console.log("CustomWorkoutAddFolder",req.user.id)
+const id=req.user.id;
+// const {name}=req.body;
+ let Usersexist=await UserModel.findOne({_id:id})
+console.log(Usersexist)
+
+const {name}=req.body;
+const username=Usersexist?.username;
+// =false;
+if(!username){
+   return res.status(500).json({message:"User does not exists !"})
+}
+if(name.trim()==""){
+   return res.status(500).json({message:"folder name can't be empty!"})
+
+}
+if(name && username){
+const folderExists=await CustomWorkoutFolders.findOne({username:username,FolderName:name});
+
+if(folderExists){
+
+  return res.status(500).json({message:"folder already exists!"})
+}
+
+}
+ const Folder=new CustomWorkoutFolders({
+       username:username,
+        FolderName:name.trim(),
+        FolderDate:"06-04-2026"
+    })
+    await Folder.save();
+  return res.status(200).json({message:"Custom Workout Folders"})
+  }catch(err){
+return res.status(500).json({message:"server side error"})
+
+  }
+  
+
+}
+const GetCustomWorkoutFolders=async (req,res)=>{
+  try{
+   const id=req.user.id;
+// const {name}=req.body;
+ let Usersexist=await UserModel.findOne({_id:id})
+ let Folders=await CustomWorkoutFolders.find({username:Usersexist?.username})
+  return res.status(200).json({message:"Custom Workout Folders",Folders:Folders})
+
+  }catch(err){
+return res.status(500).json({message:'Server side error!'})
+  }
+ 
+}
+
 
 const GetDailySession = async (req, res) => {
   try {
@@ -883,88 +942,7 @@ const AddProgressPhoto = async (req, res) => {
   // ProgressPhotoSchema
 }
 
-// const GetWorkoutBarChartDetail = async (req, res) => {
-//   try {
-
-//     //        const pullupSets = [
-//     //   { set: 1, lastReps: 8, lastWeight: 10, currentReps: 10, currentWeight: 0 },
-//     //   { set: 2, lastReps: 6, lastWeight: 9, currentReps: 8, currentWeight: 40 },
-//     //   { set: 3, lastReps: 5, lastWeight: 5, currentReps: 6, currentWeight: 10 },
-//     //   { set: 4, lastReps: 5, lastWeight: 5, currentReps: 6, currentWeight: 10 },
-//     //   { set: 5, lastReps: 5, lastWeight: 5, currentReps: 6, currentWeight: 10 },
-
-//     // ];
-//     let FinalResult = []
-
-// function GetFormatedData(data) {
-//   let prev = Array.isArray(data?.prevSet) ? data.prevSet : [];
-//   let curr = Array.isArray(data?.TodaysSet) ? data.TodaysSet : [];
-
-//   let Arr = prev.length > curr.length ? prev : curr;
-
-//   let Data = [];
-
-//   for (let i = 0; i < Arr.length; i++) {
-//     Data.push({
-//       set: i + 1,
-//       lastReps: prev[i]?.reps || 0,
-//       lastWeight: prev[i]?.weight || 0,
-//       currentReps: curr[i]?.reps || 0,
-//       currentWeight: curr[i]?.weight || 0
-//     });
-//   }
-
-//   return {
-//     name: data?.name || "Unknown",
-//     Data
-//   };
-// }
-
-
-//     function GetSpecificExerciseDetail(arr, Title) {
-//   if (!arr || !Array.isArray(arr)) return [];
-
-//   for (let j = 0; j < arr.length; j++) {
-//     if (arr[j]?.name === Title) {
-//       return arr[j]?.sets || [];
-//     }
-//   }
-
-//   return [];
-// }
-
-//     const Id = new mongoose.Types.ObjectId(req?.query?.id);
-//     let Result = await Session.findById(Id)
-//     let title = Result?.Title
-//     let givenDate = Result?.createdAt;
-//     // console.log('day', Result)
-//     let GraphData = await Session.aggregate([{ $match: { Title: title, createdAt: { $lte: givenDate } } }, { $sort: { createdAt: -1 } }, { $project: { exercises: 1 } }])
-//     // console.log('ResultGraphData0', GraphData[0].exercises)
-//     // console.log('ResultGraphData1', GraphData[1].exercises)
-//     let graphResult = []
-
-//     for (let i = 0; i < GraphData[0].exercises.length; i++) {
-//       let PreviousSetData = GetSpecificExerciseDetail(GraphData[1]?.exercises, GraphData[0]?.exercises[i]?.name) || []
-//       let CurrentData = GraphData[0]?.exercises[i].sets || []
-//       let Obj = { name: GraphData[0]?.exercises[i]?.name, prevSet: PreviousSetData, TodaysSet: CurrentData }
-//       graphResult.push(Obj)
-//     }
-//     for (let i = 0; i < graphResult.length; i++) {
-//       let result = GetFormatedData(graphResult[i])
-//       FinalResult?.push(result)
-
-
-//     }
-//     // console.log('graphResult=', graphResult)
-
-//     res.status(200).json({ result: FinalResult })
 
 
 
-//   } catch (err) {
-//     console.log(err)
-//     res.status(400).json({ message: "something went wrong" })
-//   }
-// }
-
-export {Currentexerise,GetRelatedExerciseData,GetAllPointsSum,GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export {CustomWorkoutAddFolder,GetCustomWorkoutFolders,Currentexerise,GetRelatedExerciseData,GetAllPointsSum,GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
