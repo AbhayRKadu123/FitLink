@@ -1,5 +1,5 @@
 import express from "express"
-import {CustomWorkoutAddFolder,GetCustomWorkoutFolders,Currentexerise,GetRelatedExerciseData,GetAllProgressPhoto, GetAllPointsSum
+import {DeleteCustomWorkoutFolder,CustomWorkoutAddFolder,GetCustomWorkoutFolders,Currentexerise,GetRelatedExerciseData,GetAllProgressPhoto, GetAllPointsSum
 ,AddProgressPhoto,DeleteWorkoutRoutineExerise,UpdateCustomWorkoutPlan,UpdateSelectedRoutinedays,GetSelectedRoutineDays,storedselectedRoutineDays,AddselectedRoutineDays,GetAllExercisesLastSessionHistory,UpdateUserWorkoutHistory,GetLastSessionHistory,DailyWorkoutSessionUpdate,GetUserProgress,GetWorkoutBarChartDetail,WorkoutHistoryDetail,GetWorkoutHistory,UpdateWorkoutSession,GetDailySession,Getworkoutsession, UserDetails,addcustomworkout,Deleteworkoutroutin,Updateworkoutroutin,updateUserActiveWorkoutPlan,AddWorkoutSession
 
 
@@ -13,6 +13,7 @@ WorkoutApi.get("/GetCustomWorkoutFolders",verifyToken,GetCustomWorkoutFolders)
 WorkoutApi.post("/CustomWorkoutAddFolder",verifyToken,CustomWorkoutAddFolder)
 WorkoutApi.get("/Currentexerise",verifyToken,Currentexerise)
 WorkoutApi.put("/UpdateSelectedRoutinedays",verifyToken,UpdateSelectedRoutinedays);
+WorkoutApi.delete("/DeleteCustomWorkoutFolder/:id",verifyToken,DeleteCustomWorkoutFolder)
 // GetAllPointsSum
 WorkoutApi.get("/GetAllPointsSum",verifyToken,GetAllPointsSum)
 WorkoutApi.get("/GetRelatedExerciseData",verifyToken,GetRelatedExerciseData)

@@ -375,6 +375,18 @@ return res.status(500).json({message:'Server side error!'})
  
 }
 
+const DeleteCustomWorkoutFolder= async (req,res)=>{
+try{
+  // console.log("delete folder",req.params)
+  let {id}=req.params;
+  let result=  await CustomWorkoutFolders.findByIdAndDelete(id);
+  return res.status(200).json({message:"Folder Deleted successfully!"})
+
+}catch(err){
+return res.status(500).json({message:'Server side error!'})
+}
+}
+
 
 const GetDailySession = async (req, res) => {
   try {
@@ -945,4 +957,4 @@ const AddProgressPhoto = async (req, res) => {
 
 
 
-export {CustomWorkoutAddFolder,GetCustomWorkoutFolders,Currentexerise,GetRelatedExerciseData,GetAllPointsSum,GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
+export {DeleteCustomWorkoutFolder,CustomWorkoutAddFolder,GetCustomWorkoutFolders,Currentexerise,GetRelatedExerciseData,GetAllPointsSum,GetAllProgressPhoto, AddProgressPhoto, DeleteWorkoutRoutineExerise, UpdateCustomWorkoutPlan, UpdateSelectedRoutinedays, GetSelectedRoutineDays, storedselectedRoutineDays, AddselectedRoutineDays, GetAllExercisesLastSessionHistory, UpdateUserWorkoutHistory, GetLastSessionHistory, DailyWorkoutSessionUpdate, GetUserProgress, GetWorkoutBarChartDetail, WorkoutHistoryDetail, GetWorkoutHistory, UpdateWorkoutSession, GetDailySession, Getworkoutsession, UserDetails, addcustomworkout, Deleteworkoutroutin, Updateworkoutroutin, updateUserActiveWorkoutPlan, AddWorkoutSession }
